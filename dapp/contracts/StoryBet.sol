@@ -82,13 +82,27 @@ contract StoryBet {
 
     function summaryVotes() public payable {
         require(msg.sender == owner, "only the admin can end vote");
-        Story[] memory result = rankStories();
-        // the winning dog
-        Story memory winningStory = result[0];
-        
-        address winner = winningStory.ownerAddress;
+         
+        uint topVote = 0;
+        address topUser = users[0];
+        uint totalVote = 0;
 
-        payable(winner).transfer((address(this).balance));
+        for (uint i = 0; i < users.length; i++){
+            if (getUserStoryExist(users[i]) == true)
+            {
+                totalVote += getUserStoryVote(users[i]);
+
+                if (getUserStoryVote(users[i]) >= topVote)
+                {
+                    topVote = getUserStoryVote(users[i]);
+                    topUser = users[i];
+                }
+            }
+        }
+
+        payable(topUser).transfer((address(this).balance));
+        userVoteBalance[topUser] += totalVote * votePrice;
+
         //payable(owner).transfer(address(this).balance);//transfer money back to owner
         
         clearBoard();
@@ -132,6 +146,7 @@ contract StoryBet {
     }
 
     function clearBoard() public {
+        require(msg.sender == owner, "Only the admin can end vote");
         uint len1 = stories.length;
         uint len2 = users.length;
         for(uint i = 0; i < len1; i++){
@@ -173,5 +188,9 @@ contract StoryBet {
 
     function getUserStoryExist(address addr) public view returns (bool) {
         return userStory[addr].exist;
+    }
+
+    function getUserComment(address addr) public view returns (string[] memory) {
+        return userStory[addr].comments;
     }
 }

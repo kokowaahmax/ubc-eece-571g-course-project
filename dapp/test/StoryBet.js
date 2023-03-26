@@ -327,6 +327,3 @@ describe("StoryBet", function () {
     // 5 -1 -1 + 3 = 6
   });
 });
-
-
-

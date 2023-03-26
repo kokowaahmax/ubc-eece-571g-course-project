@@ -22,13 +22,18 @@ contract StoryBet {
 
     uint public votePrice;
 
-    constructor() {
+    constructor() payable{
         owner = msg.sender;
         votePrice = 100000000000000000; // 0.1 ether
+        userVoteBalance[msg.sender] = msg.value;
     }
 
     function createStory(string[] memory _tags, uint256 _publishedDateTime, string memory _storyText) public payable {
-        require(msg.value >= votePrice, "Not enough token to public a story!");
+        require(userVoteBalance[msg.sender] >= votePrice, "Not enough token to public a story!");
+        
+        userVoteBalance[msg.sender] -= votePrice;
+        userVoteBalance[address(this)] += votePrice;
+        
         string[] memory comments;
         Story memory newStory = Story(msg.sender, 0, _tags, _publishedDateTime, _storyText, comments, true);
         userStory[msg.sender] = newStory;
@@ -36,14 +41,6 @@ contract StoryBet {
     }
 
     function removeStory() public {
-        // uint256 l = stories.length;
-        // for (uint i = 0; i < l; i++){
-        //     if(stories[i].ownerAddress == msg.sender && stories[i].ownerAddress == msg.sender){
-        //         stories[i] = stories[l - 1];
-        //     }
-        // }
-        // stories.pop();
-
         userStory[msg.sender].exist = false;
         
         uint256 l = stories.length;
@@ -57,18 +54,20 @@ contract StoryBet {
     function buyVote(uint256 _buyVoteNum) public payable {
         users.push(msg.sender);
         require(msg.value >= _buyVoteNum * votePrice, "insufficient tokens.");
-        userVoteBalance[msg.sender] += _buyVoteNum;
+        userVoteBalance[msg.sender] += _buyVoteNum * votePrice;
     }
 
     function refundVote(uint256 _refundVoteNum) public payable {
-        require(userVoteBalance[msg.sender] >= _refundVoteNum, "insufficient votes remained in the account");
-        userVoteBalance[msg.sender] -= _refundVoteNum;
+        require(userVoteBalance[msg.sender] >= _refundVoteNum * votePrice, "insufficient votes remained in the account");
+        userVoteBalance[msg.sender] -= _refundVoteNum * votePrice;
         payable(msg.sender).transfer(votePrice * _refundVoteNum);
     }
 
-    function vote(uint numVote, address storyOwner) public {
+    function vote(uint numVote, address storyOwner) public payable{
+        require(userStory[storyOwner].exist == true, "User must have story to be voted");
         require(numVote <= userVoteBalance[msg.sender], "ensure adequate account balances");
-        userVoteBalance[msg.sender] -= numVote;
+        userVoteBalance[msg.sender] -= numVote * votePrice;
+        userVoteBalance[address(this)] += numVote * votePrice;
         userStory[storyOwner].numVote += numVote;
         uint256 l = stories.length;
         
@@ -78,7 +77,7 @@ contract StoryBet {
             }
         }
         
-        rankStories();
+        // rankStories();
     }
 
     function summaryVotes() public payable {
@@ -170,5 +169,9 @@ contract StoryBet {
 
     function getAdmin() public view returns (address admin) {
         return owner;
+    }
+
+    function getUserStoryExist(address addr) public view returns (bool) {
+        return userStory[addr].exist;
     }
 }

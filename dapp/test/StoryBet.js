@@ -107,142 +107,149 @@ describe("StoryBet", function() {
   });
 
 
-
-
-  it("6. User vote for others test", async function() {
-    // owners = await ethers.getSigners();
-    // StoryBet = await ethers.getContractFactory("StoryBet");
-    // storyBet_1 = await StoryBet.connect(owners[0]).deploy({value: "50000000000000000000"});
-    // storyBet_2 = await StoryBet.connect(owners[1]).deploy({value: "50000000000000000000"});
-
-    // const tags = ["tag1", "tag2", "tag3"];
-    // const publishedDateTime = 123456789;
-    // const storyText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-    
-    // await storyBet_1.connect(owners[0]).createStory(tags, publishedDateTime, storyText);
-    // await storyBet_2.connect(owners[1]).createStory(tags, publishedDateTime, storyText);
-    
-    // oldnumvote = await storyBet_1.connect(owners[0]).getUserStoryVote(owners[1].address);
-
-    // await storyBet_1.connect(owners[0]).vote(1, owners[1].address);
-
-    // newnumvote = await storyBet_1.connect(owners[0]).getUserStoryVote(owners[1].address);
-    // expect(newnumvote).to.equal(oldnumvote+1);
-
-
-
-
-
-
+  it("6. User vote for others", async function() {
     owners = await ethers.getSigners();
     StoryBet = await ethers.getContractFactory("StoryBet");
-    storyBet_1 = await StoryBet.connect(owners[0]).deploy({value: "50000000000000000000"});
-    storyBet_2 = await StoryBet.connect(owners[1]).deploy({value: "50000000000000000000"});
+    storyBet = await StoryBet.connect(owners[0]).deploy({value: "50000000000000000000"});
+    await storyBet.connect(owners[1]).buyVote(500, {value: "50000000000000000000"});
 
     const tags = ["tag1", "tag2", "tag3"];
     const publishedDateTime = 123456789;
     const storyText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
     
-    await storyBet_1.createStory(tags, publishedDateTime, storyText);
-    await storyBet_2.createStory(tags, publishedDateTime, storyText);
+    await storyBet.connect(owners[1]).createStory(tags, publishedDateTime, storyText, );
     
-    oldnumvote = await storyBet_1.getUserStoryVote(owners[1].address);
+    oldnumvote = await storyBet.getUserStoryVote(owners[1].address);
+    old_user_balance = await storyBet.getUserVote(owners[0].address);
+    old_manager_balance = await storyBet.getUserVote(storyBet.address);
 
-    await storyBet_1.vote(1, owners[0].address, {value:"200000000000000000",from: owners[1].address});
+    expect(old_manager_balance).to.equal(ethers.BigNumber.from("100000000000000000"));
+    expect(old_user_balance).to.equal(ethers.BigNumber.from("50000000000000000000"));
 
-    newnumvote = await storyBet_1.getUserStoryVote(owners[1].address);
-    expect(newnumvote).to.equal(oldnumvote+1);
+    await storyBet.vote(300, owners[1].address);
 
-    
+    newnumvote = await storyBet.getUserStoryVote(owners[1].address);
+    new_user_balance = await storyBet.getUserVote(owners[1].address);
+    new_manager_balance = await storyBet.getUserVote(storyBet.address);
+
+
+    expect(newnumvote).to.equal(oldnumvote + 300);
+    expect(new_user_balance).to.equal(ethers.BigNumber.from("49900000000000000000"));
+    expect(new_manager_balance).to.equal(ethers.BigNumber.from("30100000000000000000"));
   });
 
-  it("7. User buy vote ", async function() {
+
+  it("7. Multiple users vote test", async function() {
     owners = await ethers.getSigners();
     StoryBet = await ethers.getContractFactory("StoryBet");
-    storyBet = await StoryBet.connect(owners[0]).deploy({value: '10000000000000000000'});
-
+    storyBet = await StoryBet.connect(owners[0]).deploy();
+    
+    for(let i = 1; i < 4; i++){
+      await storyBet.connect(owners[i]).buyVote(2, {value: "300000000000000000"});
+      //Buy 2 vote 
+      //expect(await storyBet_0.getUserVote(owners[i].address)).to.equal(ethers.BigNumber.from("200000000000000000"));
+    }
+    
+    //Buy 2 vote 
+    for(let i = 1; i < 4; i++){
+      expect(await storyBet.getUserVote(owners[i].address)).to.equal(ethers.BigNumber.from("200000000000000000"));
+    }
+    
     const tags = ["tag1", "tag2", "tag3"];
-    const publishedDateTime = 123456789;
-    const storyText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+    const publishedDateTime = 123456789; 
 
-    haveError = false;
-    await storyBet.createStory(tags, publishedDateTime, storyText);
+    const storyText1 = "story1";
+    const storyText2 = "story2";
+    const storyText3 = "story3";
+    
+    await storyBet.connect(owners[1]).createStory(tags, publishedDateTime, storyText1);
+    await storyBet.connect(owners[2]).createStory(tags, publishedDateTime, storyText2);
+    await storyBet.connect(owners[3]).createStory(tags, publishedDateTime, storyText3);
+    
+    for(let i = 1; i < 4 ; i++){
+      expect(await storyBet.getUserVote(owners[i].address)).to.equal(ethers.BigNumber.from("100000000000000000"));
+    }
+    
+    await storyBet.connect(owners[1]).vote(1, owners[1].address);
+    await storyBet.connect(owners[2]).vote(1, owners[1].address);
+    await storyBet.connect(owners[3]).vote(1, owners[2].address);
+    
+    vote = await storyBet.getUserStoryVote(owners[1].address);
+    expect(vote).to.equal(ethers.BigNumber.from("2"))
+    vote = await storyBet.getUserStoryVote(owners[2].address);
+    expect(vote).to.equal(ethers.BigNumber.from("1"))
+    vote = await storyBet.getUserStoryVote(owners[3].address);
+    expect(vote).to.equal(ethers.BigNumber.from("0"))
+  });
 
-    old_balance = await storyBet.getUserVote(owners[0].address);
-    await storyBet.buyVote(1);
-    new_balance = await storyBet.getUserVote(owners[0].address);
-    expect(old_balance).to.equal(ethers.BigNumber.from('10000000000000000000'))
+
+  it("8. User have enough money to buy vote", async function() {
+    owners = await ethers.getSigners();
+    StoryBet = await ethers.getContractFactory("StoryBet");
+    storyBet = await StoryBet.connect(owners[0]).deploy();
+
+    await storyBet.connect(owners[0]).buyVote(60, {value: "50000000000000000000"});
+    voteBalance = await storyBet.getUserVote(owners[0].address);
+    
+
+    expect(voteBalance).to.equal(ethers.BigNumber.from("6000000000000000000"));
+
+    await storyBet.connect(owners[0]).refundVote(45);
+    voteBalance = await storyBet.getUserVote(owners[0].address);
+    expect(voteBalance).to.equal(ethers.BigNumber.from("1500000000000000000"));
+
+  });
+
+  it("9. User can comment", async function() {
+     owners = await ethers.getSigners();
+    StoryBet = await ethers.getContractFactory("StoryBet");
+    storyBet = await StoryBet.connect(owners[0]).deploy();
+    
+    for(let i = 1; i < 4; i++){
+      await storyBet.connect(owners[i]).buyVote(2, {value: "300000000000000000"});
+     
+    }
+    
+    //Buy 2 vote 
+    for(let i = 1; i < 4; i++){
+      expect(await storyBet.getUserVote(owners[i].address)).to.equal(ethers.BigNumber.from("200000000000000000"));
+    }
+    
+    const tags = ["tag1", "tag2", "tag3"];
+    const publishedDateTime = 123456789; 
+
+    const storyText1 = "story1";
+    const storyText2 = "story2";
+    const storyText3 = "story3";
+
+    const storycomment1 = 'good story'
+    const storycomment2 = 'bad story'
+    const storycomment3 = 'not good or bad story'
+    
+    await storyBet.connect(owners[1]).createStory(tags, publishedDateTime, storyText1);
+    await storyBet.connect(owners[2]).createStory(tags, publishedDateTime, storyText2);
+    await storyBet.connect(owners[3]).createStory(tags, publishedDateTime, storyText3);
+    
+    for(let i = 1; i < 4 ; i++){
+      expect(await storyBet.getUserVote(owners[i].address)).to.equal(ethers.BigNumber.from("100000000000000000"));
+    }
+    
+    await storyBet.connect(owners[1]).comment( owners[1].address, storycomment1);
+    await storyBet.connect(owners[1]).comment( owners[2].address, storycomment2);
+    
+    
+    comment = await storyBet.getUserComment(owners[1].address);
+    expect(comment[0]).to.equal(storycomment1)
+    comment = await storyBet.getUserComment(owners[2].address);
+    expect(comment[0]).to.equal(storycomment2)
+    
 
   });
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-  // it("6. rankStories test", async function() {
-  //   owners = await ethers.getSigners();
-  //   StoryBet = await ethers.getContractFactory("StoryBet");
-  //   storyBet_0 = await StoryBet.connect(owners[0]).deploy({value: "200000000000000000000"});
-  //   storyBet_1 = await StoryBet.connect(owners[1]).deploy({value: "200000000000000000000"});
-  //   storyBet_2 = await StoryBet.connect(owners[2]).deploy({value: "200000000000000000000"});
-  //   storyBet_3 = await StoryBet.connect(owners[3]).deploy({value: "200000000000000000000"});
-
-  //   const tags = ["tag1", "tag2", "tag3"];
-  //   const publishedDateTime = 123456789;
-  //   const storyText0 = "story0.";
-  //   const storyText1 = "story1.";
-  //   const storyText2 = "story2.";
-  //   const storyText3 = "story3.";
-    
-  //   await storyBet_0.connect(owners[0]).createStory(tags, publishedDateTime, storyText0);
-  //   await storyBet_1.connect(owners[1]).createStory(tags, publishedDateTime, storyText1);
-  //   await storyBet_2.connect(owners[2]).createStory(tags, publishedDateTime, storyText2);
-  //   await storyBet_3.connect(owners[3]).createStory(tags, publishedDateTime, storyText3);
-
-  //   await storyBet_0.connect(owners[0]).vote(1, owners[1]);
-  //   await storyBet_1.vote(1, owners[1]);
-  //   await storyBet_2.vote(1, owners[2]);
-  //   await storyBet_3.vote(1, owners[1]);
-  //  // const vote = storyBet_0.getUserStoryVote(owners[0]);
-  // // expect(vote).to.equal(ethers.BigNumber.from("0"))
-
-  // });
-
-
-
-
-
-
-
-  // it("should remove a user's story", async function() {
-  //   const tags = ["tag1", "tag2", "tag3"];
-  //   const publishedDateTime = 123456789;
-  //   const storyText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-  //   const votePrice = await storyBet.votePrice();
-
-  //   // User 1 creates a new story
-  //   await expect(storyBet.connect(user1).createStory(tags, publishedDateTime, storyText, { value: votePrice }))
-  //     .to.emit(storyBet, "StoryCreated")
-  //     .withArgs(user1.address);
-
-  //   // User 1 removes their story
-  //   await expect(storyBet.connect(user1).removeStory())
-  //     .to.emit(storyBet, "StoryRemoved")
-  //     .withArgs(user1.address);
-
-  //   // Check that the user's story was removed correctly
-  //   const user1Story = await storyBet.userStory(user1.address);
-  //   expect(user1Story.exist).to.equal(false);
-  // });
+  
 });
 
 

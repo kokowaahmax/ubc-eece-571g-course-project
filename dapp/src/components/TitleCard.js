@@ -26,7 +26,7 @@ const TitleCard = () => {
         StoryBet
       </Title>
       <Paragraph
-        style={{
+        style={{  
           fontFamily: 'sans-serif',
           fontSize: '20px',
           color: '#888',

@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Input, Button, Card } from 'antd';
+const { TextArea } = Input;
 
 function MessageForm({ addMessage }) {
   const [text, setText] = useState("");
@@ -12,21 +14,28 @@ function MessageForm({ addMessage }) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        placeholder="Your name"
+    <Card style={{ borderRadius: '15px', boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)' }}>
+      <form onSubmit={handleSubmit} 
+    style={{ display: 'flex', flexDirection: 'column' }}>
+      <Input
+        placeholder="Author name"
+        style={{ marginBottom: '10px' }}
         value={author}
-        onChange={(event) => setAuthor(event.target.value)}
+        onChange={(e) => setAuthor(e.target.value)}
       />
-      <input
-        type="text"
-        placeholder="Your message"
+      <TextArea
+        placeholder="Type up to 1000 characters here..."
+        maxLength={1000}
         value={text}
-        onChange={(event) => setText(event.target.value)}
+        onChange={(e) => setText(e.target.value)}
       />
-      <button type="submit">Send</button>
+      {/* <button type="submit">Send</button> */}
+      <Button htmlType="submit" type="primary" 
+      style={{ marginTop: '10px', alignSelf: 'flex-end'}}>
+        Send
+      </Button>
     </form>
+    </Card>
   );
 }
 

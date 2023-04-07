@@ -7,6 +7,7 @@ contract StoryBet {
         address ownerAddress;
         uint numVote;
         string[] tags;
+        // string[] storyTitle;
         uint256 publishedDateTime;
         string storyText;
         string[] comments;

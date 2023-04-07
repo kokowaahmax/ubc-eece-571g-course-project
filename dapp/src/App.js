@@ -10,7 +10,7 @@ import { AppRouter } from './AppRouter';
 
 
 // import ABI code to interact with the smart contract
-// import contract from './artifacts/contracts/Lock.sol/Lock.json'
+import StoryBet from './artifacts/contracts/StoryBet.sol/StoryBet.json'
 
 // react component
 import StoryList from "./components/StoryList"
@@ -18,12 +18,11 @@ import StoryForm from "./components/StoryForm"
 import TitleCard from './components/TitleCard';
 import MyDashboard from './components/MyDashboard'
 
-// const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
 const { Header, Content, Footer } = Layout;
 
 
 function App() {
-
+  const [storyBet, setStoryBet] = useState();
   const [stories, setStories] = useState([]);
   const [currentMenuItem, setCurrentMenuItem] = useState(
     window.location.pathname
@@ -34,30 +33,65 @@ function App() {
 
   useEffect(() => {
     async function init() {
-      // Check if MetaMask is installed
-      if (!window.ethereum) {
-        alert('Please install MetaMask first.');
-        return;
+      // // Check if MetaMask is installed
+      // if (!window.ethereum) {
+      //   alert('Please install MetaMask first.');
+      //   return;
+      // }
+
+      // // Request access to accounts
+      // await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+      // // Set up the provider and signer objects
+      // const provider = new ethers.providers.Web3Provider(window.ethereum);
+      // const signer = provider.getSigner();
+
+      // // Set the provider, signer, and selected address in the state
+      // setProvider(provider);
+      // setSigner(signer);
+      // setSelectedAddress(await signer.getAddress());
+
+      // // Log the selected address to the console
+      // console.log(`Selected address: ${selectedAddress}`);
+
+      // const contractAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
+      // const abi = StoryBet;
+      // const _storyBet = new ethers.Contract(contractAddress, abi, signer);
+
+      // if (storyBet?.address !== _storyBet.address) {
+      //   setStoryBet(_storyBet);
+      // }
+
+      // console.log(storyBet);
+      const _provider = new ethers.providers.Web3Provider(
+        window.ethereum,
+        "any"
+      );
+      await _provider.send("eth_requestAccounts", []);
+      const _signer = _provider.getSigner();
+      // get the contract instance
+      const _storyBet = new ethers.Contract(
+        '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
+        StoryBet.abi,
+        _signer
+      );
+
+      if (!provider) {
+        setProvider(_provider);
+      }
+      if (!signer) {
+        setSigner(_signer);
+      }
+      if (storyBet?.address !== _storyBet.address) {
+        setStoryBet(_storyBet);
       }
 
-      // Request access to accounts
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-      // Set up the provider and signer objects
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-
-      // Set the provider, signer, and selected address in the state
-      setProvider(provider);
-      setSigner(signer);
-      setSelectedAddress(await signer.getAddress());
-
-      // Log the selected address to the console
-      console.log(`Selected address: ${selectedAddress}`);
+      console.log(signer.getAddress());
+      console.log(storyBet.userStory);
     }
 
     init();
-  }, []);
+  }, [provider, signer, storyBet]);
 
   function addStory(newStory) {
     setStories([...stories, { ...newStory, id: Date.now(), comments: [], votes: 0 }]);

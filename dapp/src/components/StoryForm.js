@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { Input, Button, Card } from 'antd';
 const { TextArea } = Input;
 
-function MessageForm({ addMessage }) {
+function StoryForm({ addStory }) {
   const [text, setText] = useState("");
   const [author, setAuthor] = useState("");
 
   function handleSubmit(event) {
     event.preventDefault();
-    addMessage({ text, author });
+    addStory({ text, author });
     setText("");
     setAuthor("");
   }
@@ -39,4 +39,4 @@ function MessageForm({ addMessage }) {
   );
 }
 
-export default MessageForm;
+export default StoryForm;

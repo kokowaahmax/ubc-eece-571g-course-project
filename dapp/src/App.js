@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { ethers } from 'ethers';
 import { Layout, Menu, Button } from "antd";
 import { ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import { Link, Routes, Route  } from 'react-router-dom';
 import { AppRouter } from './AppRouter';
 
 
@@ -16,6 +16,7 @@ import { AppRouter } from './AppRouter';
 import StoryList from "./components/StoryList"
 import StoryForm from "./components/StoryForm"
 import TitleCard from './components/TitleCard';
+import MyDashboard from './components/MyDashboard'
 
 // const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
 const { Header, Content, Footer } = Layout;
@@ -43,8 +44,8 @@ function App() {
           <Header style={{ position: 'fixed', zIndex: 1, width: '100%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <Link to='/' style={{ marginRight: 15 }} key="storyBoard" onClick={{handleClickMenuItem}}>Story Board</Link>
-                <Link to='/dashboard' key="dashboard" onClick={{handleClickMenuItem}}>My Dashboard</Link>
+                <Link to='/' style={{ marginRight: 15 }} key="storyBoard" onClick={{handleClickMenuItem}} className={currentMenuItem === "/" ? "active" : ""}>Story Board</Link>
+                <Link to='/dashboard' key="dashboard" onClick={{handleClickMenuItem}} className={currentMenuItem === "/dashboard" ? "active" : ""}>My Dashboard</Link>
               </div>
               <div>
                 <Button style={{ marginRight: 8 }} icon={<UserOutlined />}>Connect Wallet</Button>
@@ -55,9 +56,18 @@ function App() {
           <Content
           style={{ padding: "10px 50px", marginTop: 80, alignItems: 'center'}}
           >
-            <TitleCard />
-            <StoryForm addStory={addStory} />
-            <StoryList stories={stories} setStories={setStories}/>
+            <Routes>
+              <Route path='/' element={<>
+                <TitleCard />
+                <StoryForm addStory={addStory} />
+                <StoryList stories={stories} setStories={setStories}/>
+              </>} />
+              <Route path='/dashboard' element={
+                <>
+                  <MyDashboard/>
+                </>
+              }/>
+            </Routes>
           </Content>
           <Footer style={{ textAlign: "center" }}>EECE571G © WT2022/2023 Project Group 5 </Footer>
         </Layout>

@@ -1,9 +1,9 @@
 // node requirements
 import logo from './logo.svg';
 import './App.css';
-import React, { useState } from "react";
+import React,  { useState, useEffect }from "react";
 import { ethers } from 'ethers';
-import { Layout, Menu, Button } from "antd";
+import { Layout, Button } from "antd";
 import { ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
 import { Link, Routes, Route  } from 'react-router-dom';
 import { AppRouter } from './AppRouter';
@@ -28,6 +28,36 @@ function App() {
   const [currentMenuItem, setCurrentMenuItem] = useState(
     window.location.pathname
   );
+  const [provider, setProvider] = useState(null);
+  const [signer, setSigner] = useState(null);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+
+  useEffect(() => {
+    async function init() {
+      // Check if MetaMask is installed
+      if (!window.ethereum) {
+        alert('Please install MetaMask first.');
+        return;
+      }
+
+      // Request access to accounts
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+      // Set up the provider and signer objects
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+
+      // Set the provider, signer, and selected address in the state
+      setProvider(provider);
+      setSigner(signer);
+      setSelectedAddress(await signer.getAddress());
+
+      // Log the selected address to the console
+      console.log(`Selected address: ${selectedAddress}`);
+    }
+
+    init();
+  }, []);
 
   function addStory(newStory) {
     setStories([...stories, { ...newStory, id: Date.now(), comments: [], votes: 0 }]);
@@ -48,7 +78,33 @@ function App() {
                 <Link to='/dashboard' key="dashboard" onClick={{handleClickMenuItem}} className={currentMenuItem === "/dashboard" ? "active" : ""}>My Dashboard</Link>
               </div>
               <div>
-                <Button style={{ marginRight: 8 }} icon={<UserOutlined />}>Connect Wallet</Button>
+              {selectedAddress ? (
+                <Button style={{ marginRight: 8 }} icon={<UserOutlined />}>
+                  {selectedAddress.slice(0, 6) + "..." + selectedAddress.slice(-4)}
+                </Button>
+              ) : (
+                <Button
+                  style={{ marginRight: 8 }}
+                  icon={<UserOutlined />}
+                  onClick={
+                  async () => {
+                      try {
+                        await window.ethereum.request({ method: "eth_requestAccounts" });
+                        const provider = new ethers.providers.Web3Provider(window.ethereum);
+                        setProvider(provider);
+                        const signer = provider.getSigner();
+                        setSigner(signer);
+                        const selectedAddress = await signer.getAddress();
+                        setSelectedAddress(selectedAddress);
+                      } catch (error) {
+                        console.log(error);
+                      }
+                  }
+                  }
+                >
+                  Connect Wallet
+                </Button>
+              )}
                 <Button icon={<ShoppingCartOutlined/>}>Buy Token</Button>
               </div>
             </div>

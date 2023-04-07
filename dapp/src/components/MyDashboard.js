@@ -8,9 +8,9 @@ const MyDashboard = () => {
   const username = 'John Doe';
   const coins = 100;
   const stories = [
-    { text: 'Story 1', coinsEarned: 20 },
-    { text: 'Story 2', coinsEarned: 30 },
-    { text: 'Story 3', coinsEarned: 50 },
+    { text: 'Story 1', coinsEarned: 20, title:'title1' },
+    { text: 'Story 2', coinsEarned: 30, title:'title2' },
+    { text: 'Story 3', coinsEarned: 50, title:'title3' },
   ];
 
   const [storyBetTopic, setStoryBetTopic] = useState("");
@@ -55,11 +55,15 @@ const MyDashboard = () => {
                 {stories.map((story) => (
                 <Card key={story.text} style={{ marginTop: '10px',  borderRadius: '15px', boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)' }}>
                     <p style={{ marginBottom: '0px' }}>
+                    Story Title: <strong>{story.title}</strong>
+                    </p>
+                    <p style={{ marginBottom: '0px' }}>
                     Story: <strong>{story.text}</strong>
                     </p>
                     <p style={{ marginBottom: '0px' }}>
                     Coins earned: <strong>{story.coinsEarned}</strong>
                     </p>
+
                 </Card>
                 ))}
                 {isUserAdmin && (

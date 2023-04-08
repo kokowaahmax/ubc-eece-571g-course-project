@@ -1,5 +1,6 @@
   import { Card, Button, Input, List } from "antd";
   import React, { useState } from 'react';
+  import { ethers } from 'ethers';
   import { CrownOutlined, DollarCircleOutlined, CommentOutlined} from '@ant-design/icons';
 
   const { TextArea } = Input;
@@ -51,7 +52,7 @@
     return (
       <ul style={{ listStyleType: 'none', padding: 0, margin: '15px', flexDirection: 'column', alignItems: 'center' }}>
         {stories.map((story, index) => (
-          <li key={story.id} style={{ marginBottom: '10px' }}>
+          <li key={parseInt(ethers.utils.formatUnits(story.publishedDateTime, 0))} style={{ marginBottom: '10px' }}>
             <Card style={{ 
                 borderRadius: '15px', 
                 boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)',
@@ -68,12 +69,12 @@
                 </div>
               )}
               <div>
-              <strong>{story.author}: </strong>
-              {story.text}
+              <strong>{story.tags[0]}: </strong>
+              {story.storyText}
               </div>
               
               {/* Render the comments as a list */}
-              {story.comment && story.comments.length > 0 && (
+              {story.comments && story.comments.length > 0 && (
                 <List
                   dataSource={story.comments}
                   renderItem={(item) => (

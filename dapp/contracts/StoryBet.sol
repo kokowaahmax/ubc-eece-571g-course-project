@@ -26,28 +26,18 @@ contract StoryBet {
     constructor() payable {
         owner = msg.sender;
         votePrice = 100000000000000000; // 0.1 ether
-        userVoteBalance[msg.sender] = msg.value;
+        // userVoteBalance[msg.sender] = msg.value;
     }
 
-    event StoryAdded(string[] tags, string title, uint256 publishedDateTime, string storyText);
+    event StoryAdded(string[] tags, string title, uint256 publishedDateTime, string storyText, string[] comments);
 
     function createStory(string[] memory _tags, string[] memory _storyTitle,uint256 _publishedDateTime, string memory _storyText) public payable {
-        // require(userVoteBalance[msg.sender] >= votePrice, "Not enough token to public a story!");
-        
-        // userVoteBalance[msg.sender] -= votePrice;
-        // userVoteBalance[address(this)] += votePrice;
-        
-        // string[] memory comments;
-        // Story memory newStory = Story(msg.sender, 0, _tags, _storyTitle,_publishedDateTime, _storyText, comments, true);
-        // userStory[msg.sender] = newStory;
-        // stories.push(newStory);
-        // Check if the sender has enough ether
 
         // Check if the sender has enough ether
         require(userVoteBalance[msg.sender] >= votePrice, "Not enough token to public a story!");
         
         // Update the vote balances
-        userVoteBalance[msg.sender] -= msg.value;
+        userVoteBalance[msg.sender] -= votePrice;
         userVoteBalance[address(this)] += votePrice;
         
         // Create the new story
@@ -55,7 +45,7 @@ contract StoryBet {
         Story memory newStory = Story(msg.sender, 0, _tags, _storyTitle,_publishedDateTime, _storyText, comments, true);
         userStory[msg.sender] = newStory;
         stories.push(newStory);
-        emit StoryAdded(_tags, _storyTitle[0], _publishedDateTime, _storyText);
+        emit StoryAdded(_tags, _storyTitle[0], _publishedDateTime, _storyText, comments);
     }
 
     function removeStory() public {

@@ -30,7 +30,7 @@ contract StoryBet {
     }
 
     event StoryAdded(string[] tags, string title, uint256 publishedDateTime, string storyText, string[] comments);
-
+    // event CommentAdded(address ownerAddress,  string storyText);
     function createStory(string[] memory _tags, string[] memory _storyTitle,uint256 _publishedDateTime, string memory _storyText) public payable {
 
         // Check if the sender has enough ether
@@ -168,6 +168,8 @@ contract StoryBet {
 
     function comment(address storyOwner, string memory storyText) public {
         userStory[storyOwner].comments.push(storyText);
+        // emit CommentAdded(storyOwner, storyText);
+
     }
 
     function getStories() public view returns (Story[] memory) {

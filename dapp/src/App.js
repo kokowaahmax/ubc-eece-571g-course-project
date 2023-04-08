@@ -3,7 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import React,  { useState, useEffect }from "react";
 import { ethers } from 'ethers';
-import { Layout, Button } from "antd";
+import { Layout, Button, message } from "antd";
 import { UserOutlined } from '@ant-design/icons';
 import { Link, Routes, Route  } from 'react-router-dom';
 import { AppRouter } from './AppRouter';
@@ -21,7 +21,7 @@ import BuyTokenButton from './components/BuyTokenButton';
 
 const { Header, Content, Footer } = Layout;
 // TODO: input your contract address
-const storyBetAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+const storyBetAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
 
 function App() {
   const [storyBet, setStoryBet] = useState();
@@ -69,7 +69,7 @@ function App() {
 
       const handleStoryAdded = async (tags, title, publishedDateTime, storyText, comments, ownerAddress) => {
         const newStory = { tags, title, publishedDateTime, storyText, comments, ownerAddress };
-        console.log(newStory);
+        // console.log(newStory);
         setStories(prevStories => [...prevStories, newStory]);
       };
 

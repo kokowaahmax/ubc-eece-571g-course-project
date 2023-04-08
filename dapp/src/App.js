@@ -71,7 +71,7 @@ function App() {
       const _signer = _provider.getSigner();
       // get the contract instance
       const _storyBet = new ethers.Contract(
-        '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
+        '0x5FbDB2315678afecb367f032d93F642f64180aa3',
         StoryBet.abi,
         _signer
       );
@@ -149,7 +149,7 @@ function App() {
             <Routes>
               <Route path='/' element={<>
                 <TitleCard />
-                <StoryForm addStory={addStory} />
+                <StoryForm addStory={addStory} provider={provider} storyBet = {storyBet} />
                 <StoryList stories={stories} setStories={setStories}/>
               </>} />
               <Route path='/dashboard' element={

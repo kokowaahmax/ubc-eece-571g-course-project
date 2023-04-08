@@ -18,16 +18,12 @@
 
     const handleCommentSubmit = (storyId) => {
       // Find the story with the matching ID
-      const story = stories.find((s) => s.publishedDateTime === storyId);
+      const story = stories.find((s) => s.id === storyId);
     
       // Create a new comment object and add it to the story's comments array
       if (comment) {
         const newComment = { text: comment };
-        // story.comments.push(newComment);
-        const updatedComments = [...story.comments, newComment]
-        story.comments = updatedComments;
-        // console.log(story.comments)
-        
+        story.comments.push(newComment);
       }
     
       // Reset comment state and hide input field
@@ -35,6 +31,7 @@
       setShowCommentInput(false);
     };
 
+    //storyid = date
     const handleDollarButtonClick = (storyId) => {
       // Find the story with the matching ID
       const storyIndex = stories.findIndex((s) => s.id === storyId);
@@ -50,8 +47,9 @@
       const sortedStories = [...updatedStories].sort((a, b) => b.votes - a.votes);
       // Update the state with the new array
       setStories(sortedStories);
+      
     };
-  
+
     //storyid = date
     const handleVoteButtonClick = async(storyId) => {
       //const storyIndex = stories.findIndex((s) => parseInt(ethers.utils.formatUnits(s.publishedDateTime,0)) === storyId);
@@ -60,6 +58,7 @@
       await storyBet.vote(1, storyId);
 
     };
+  
 
     return (
       <ul style={{ listStyleType: 'none', padding: 0, margin: '15px', flexDirection: 'column', alignItems: 'center' }}>
@@ -117,7 +116,7 @@
                   />
                   <Button
                     type="primary"
-                    onClick={() => handleCommentSubmit(story.publishedDateTime)}
+                    onClick={() => handleCommentSubmit(story.id)}
                     style={{ marginTop: '10px' }}
                   >
                     Submit
@@ -128,6 +127,7 @@
               <Button
                   shape="circle"
                   icon={<DollarCircleOutlined />}
+                  //onClick={() => handleDollarButtonClick(story.id)}
                   onClick={() => handleVoteButtonClick(parseInt(ethers.utils.formatUnits(story.publishedDateTime, 0)))}
                   style={{
                     borderRadius: '45%',

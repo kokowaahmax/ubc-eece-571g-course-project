@@ -21,7 +21,7 @@ import BuyTokenButton from './components/BuyTokenButton';
 
 const { Header, Content, Footer } = Layout;
 // TODO: input your contract address
-const storyBetAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
+const storyBetAddress = '';
 
 function App() {
   const [storyBet, setStoryBet] = useState();

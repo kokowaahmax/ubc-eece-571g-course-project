@@ -67,8 +67,8 @@ function App() {
     if (storyBet) {
       const eventFilter = storyBet.filters.StoryAdded();
 
-      const handleStoryAdded = async (tags, title, publishedDateTime, storyText, comments) => {
-        const newStory = { tags, title, publishedDateTime, storyText, comments };
+      const handleStoryAdded = async (tags, title, publishedDateTime, storyText, comments, ownerAddress) => {
+        const newStory = { tags, title, publishedDateTime, storyText, comments, ownerAddress };
         console.log(newStory);
         setStories(prevStories => [...prevStories, newStory]);
       };

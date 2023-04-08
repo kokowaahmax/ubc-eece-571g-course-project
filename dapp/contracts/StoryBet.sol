@@ -6,10 +6,10 @@ contract StoryBet {
     struct Story {
         address ownerAddress;
         uint numVote;
-        string[] tags;      // The topics that published by admin
-        string storyTitle;  // The title of the story that user write
+        string[] tags;
+        string[] storyTitle;
         uint256 publishedDateTime;
-        string storyText;   // The content of the story that user write
+        string storyText;
         string[] comments;
         bool exist;
     }
@@ -29,14 +29,14 @@ contract StoryBet {
         userVoteBalance[msg.sender] = msg.value;
     }
 
-    function createStory(string[] memory _tags, string memory _storyTitle,uint256 _publishedDateTime, string memory _storyText) public payable {
+    function createStory(string[] memory _tags, string[] memory _storyTitle,uint256 _publishedDateTime, string memory _storyText) public payable {
         require(userVoteBalance[msg.sender] >= votePrice, "Not enough token to public a story!");
         
         userVoteBalance[msg.sender] -= votePrice;
         userVoteBalance[address(this)] += votePrice;
         
         string[] memory comments;
-        Story memory newStory = Story(msg.sender, 0, _tags, _storyTitle, _publishedDateTime, _storyText, comments, true);
+        Story memory newStory = Story(msg.sender, 0, _tags, _storyTitle,_publishedDateTime, _storyText, comments, true);
         userStory[msg.sender] = newStory;
         stories.push(newStory);
     }
@@ -194,7 +194,7 @@ contract StoryBet {
     function getUserComment(address addr) public view returns (string[] memory) {
         return userStory[addr].comments;
     }
-    function getUserStoryTitle(address addr) public view returns (string memory) {
+    function getUserStoryTitle(address addr) public view returns (string[] memory) {
         return userStory[addr].storyTitle;
     }
     function getStoryAuthor(address addr) public view returns (string[] memory) {

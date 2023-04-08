@@ -29,7 +29,7 @@ contract StoryBet {
         // userVoteBalance[msg.sender] = msg.value;
     }
 
-    event StoryAdded(string[] tags, string title, uint256 publishedDateTime, string storyText, string[] comments, address ownerAddress);
+    event StoryAdded(string[] tags, string title, uint256 publishedDateTime, string storyText, string[] comments, address ownerAddress, uint numVote);
     event CommentAdded(address ownerAddress,  string storyText);
     function createStory(string[] memory _tags, string[] memory _storyTitle,uint256 _publishedDateTime, string memory _storyText) public payable {
 
@@ -45,7 +45,7 @@ contract StoryBet {
         Story memory newStory = Story(msg.sender, 0, _tags, _storyTitle,_publishedDateTime, _storyText, comments, true);
         userStory[msg.sender] = newStory;
         stories.push(newStory);
-        emit StoryAdded(_tags, _storyTitle[0], _publishedDateTime, _storyText, comments, msg.sender);
+        emit StoryAdded(_tags, _storyTitle[0], _publishedDateTime, _storyText, comments, msg.sender, newStory.numVote);
     }
 
     function removeStory() public {

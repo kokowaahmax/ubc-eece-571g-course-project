@@ -29,8 +29,8 @@ contract StoryBet {
         // userVoteBalance[msg.sender] = msg.value;
     }
 
-    event StoryAdded(string[] tags, string title, uint256 publishedDateTime, string storyText, string[] comments);
-    // event CommentAdded(address ownerAddress,  string storyText);
+    event StoryAdded(string[] tags, string title, uint256 publishedDateTime, string storyText, string[] comments, address ownerAddress);
+    event CommentAdded(address ownerAddress,  string storyText);
     function createStory(string[] memory _tags, string[] memory _storyTitle,uint256 _publishedDateTime, string memory _storyText) public payable {
 
         // Check if the sender has enough ether
@@ -45,7 +45,7 @@ contract StoryBet {
         Story memory newStory = Story(msg.sender, 0, _tags, _storyTitle,_publishedDateTime, _storyText, comments, true);
         userStory[msg.sender] = newStory;
         stories.push(newStory);
-        emit StoryAdded(_tags, _storyTitle[0], _publishedDateTime, _storyText, comments);
+        emit StoryAdded(_tags, _storyTitle[0], _publishedDateTime, _storyText, comments, msg.sender);
     }
 
     function removeStory() public {
@@ -168,7 +168,7 @@ contract StoryBet {
 
     function comment(address storyOwner, string memory storyText) public {
         userStory[storyOwner].comments.push(storyText);
-        // emit CommentAdded(storyOwner, storyText);
+        emit CommentAdded(storyOwner, storyText);
 
     }
 

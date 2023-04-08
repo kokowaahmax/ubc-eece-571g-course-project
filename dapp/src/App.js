@@ -33,36 +33,6 @@ function App() {
 
   useEffect(() => {
     async function init() {
-      // // Check if MetaMask is installed
-      // if (!window.ethereum) {
-      //   alert('Please install MetaMask first.');
-      //   return;
-      // }
-
-      // // Request access to accounts
-      // await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-      // // Set up the provider and signer objects
-      // const provider = new ethers.providers.Web3Provider(window.ethereum);
-      // const signer = provider.getSigner();
-
-      // // Set the provider, signer, and selected address in the state
-      // setProvider(provider);
-      // setSigner(signer);
-      // setSelectedAddress(await signer.getAddress());
-
-      // // Log the selected address to the console
-      // console.log(`Selected address: ${selectedAddress}`);
-
-      // const contractAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
-      // const abi = StoryBet;
-      // const _storyBet = new ethers.Contract(contractAddress, abi, signer);
-
-      // if (storyBet?.address !== _storyBet.address) {
-      //   setStoryBet(_storyBet);
-      // }
-
-      // console.log(storyBet);
       const _provider = new ethers.providers.Web3Provider(
         window.ethereum,
         "any"
@@ -71,7 +41,8 @@ function App() {
       const _signer = _provider.getSigner();
       // get the contract instance
       const _storyBet = new ethers.Contract(
-        '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+        // TODO: 
+        'insert your contract address',
         StoryBet.abi,
         _signer
       );
@@ -94,7 +65,8 @@ function App() {
   }, [provider, signer, storyBet]);
 
   function addStory(newStory) {
-    setStories([...stories, { ...newStory, id: Date.now(), comments: [], votes: 0 }]);
+    storyBet.createStory([`${newStory.author}`], ["title1"], Date.now(), newStory.text);
+    // setStories([...stories, { ...newStory, id: Date.now(), comments: [], votes: 0 }]);
   }
 
   const handleClickMenuItem = (e) => {

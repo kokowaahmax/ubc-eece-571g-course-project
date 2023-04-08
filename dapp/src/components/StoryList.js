@@ -18,12 +18,16 @@
 
     const handleCommentSubmit = (storyId) => {
       // Find the story with the matching ID
-      const story = stories.find((s) => s.id === storyId);
+      const story = stories.find((s) => s.publishedDateTime === storyId);
     
       // Create a new comment object and add it to the story's comments array
       if (comment) {
         const newComment = { text: comment };
-        story.comments.push(newComment);
+        // story.comments.push(newComment);
+        const updatedComments = [...story.comments, newComment]
+        story.comments = updatedComments;
+        // console.log(story.comments)
+        
       }
     
       // Reset comment state and hide input field
@@ -105,7 +109,7 @@
                   />
                   <Button
                     type="primary"
-                    onClick={() => handleCommentSubmit(story.id)}
+                    onClick={() => handleCommentSubmit(story.publishedDateTime)}
                     style={{ marginTop: '10px' }}
                   >
                     Submit

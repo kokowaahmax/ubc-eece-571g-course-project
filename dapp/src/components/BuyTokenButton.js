@@ -29,10 +29,6 @@ function BuyTokenButton({storyBet}) {
       const votePrice = ethers.utils.parseEther('0.1');
       const amount = ethers.BigNumber.from(numVotes).mul(votePrice);
       // Send the transaction to the contract
-    //   const contractAddress = /* Your contract address here */;
-    //   const contractABI = /* Your contract ABI here */;
-    //   const contract = new web3.eth.Contract(contractABI, contractAddress);
-
     const transaction = await storyBet.buyVote(numVotes, {
         value: amount
     });

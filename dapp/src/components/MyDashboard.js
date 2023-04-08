@@ -1,5 +1,6 @@
 import React, { useState, useEffect  } from "react";
-import { Layout, Card, Avatar, Button, Input, Modal } from 'antd';
+import { Layout, Card, Avatar, Button, Input, Modal, message, InputNumber } from 'antd';
+import { ethers } from 'ethers';
 
 const { Header, Content } = Layout;
 const { confirm } = Modal;
@@ -19,6 +20,29 @@ const MyDashboard = ({signer, storyBet}) => {
 
   const [storyBetTopic, setStoryBetTopic] = useState("");
   const [showModal, setShowModal] = useState(false);
+
+  const [refundVoteNum, setRefundVoteNum] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  function handleRefundTokenClick() {
+    setIsModalOpen(true);
+  }
+
+  async function handleModalCancel() {
+    setIsModalOpen(false);
+  }
+
+  async function handleModalOk() {
+    setIsModalOpen(false);
+    try {
+      const transaction = await storyBet.refundVote(refundVoteNum);
+      await transaction.wait();
+      message.success("Transaction confirmed");
+    } catch (error) {
+      message.error(error.message);
+    }
+  }
+
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -57,15 +81,31 @@ const MyDashboard = ({signer, storyBet}) => {
     <>
         <Layout>
             <Content style={{ padding: '50px' }}>
-                <Card style={{ borderRadius: '15px', boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)' }}>
-                <Avatar size={64} style={{ backgroundColor: '#0055B7' }}>
-                  {username.slice(0, 4)}
-                </Avatar>
+            <Card style={{ borderRadius: '15px', boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)', display: 'flex', alignItems: 'center' }}>
+              <Avatar size={64} style={{ backgroundColor: '#0055B7' }}>
+                {username.slice(0, 4)}
+              </Avatar>
+              <div style={{ marginLeft: '20px' }}>
                 <h2 style={{ marginTop: '10px' }}>{username}</h2>
-                <p style={{ marginBottom: '0px' }}>
+                <div>
+                  <p>
                     Coins: <strong>{balance / 10**17}</strong> = {balance} wei
-                </p>
-                </Card>
+                  </p>
+                  <div style={{float: 'right'}}>
+                    <Button onClick={handleRefundTokenClick}>Refund Token</Button>
+                  </div>
+                  <Modal
+                    title="Refund Tokens"
+                    open={isModalOpen}
+                    onOk={handleModalOk}
+                    onCancel={handleModalCancel}
+                  >
+                    <p>Please enter the number of tokens to refund:</p>
+                    <InputNumber min={0} max={balance / 10**17} onChange={setRefundVoteNum} />
+                  </Modal>
+                </div>
+              </div>
+            </Card>
                 <h2 style={{ marginTop: '20px' }}>My Stories</h2>
                 {stories.map((story) => (
                 <Card key={story.text} style={{ marginTop: '10px',  borderRadius: '15px', boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)' }}>

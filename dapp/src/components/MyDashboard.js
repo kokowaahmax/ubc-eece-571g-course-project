@@ -1,21 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect  } from "react";
 import { Layout, Card, Avatar, Button, Input, Modal } from 'antd';
 
 const { Header, Content } = Layout;
 const { confirm } = Modal;
 
-const MyDashboard = () => {
-  const username = 'John Doe';
-  const coins = 100;
+const MyDashboard = ({signer, storyBet}) => {
+  // const username = 'John Doe';
+  // const coins = 100;
   const stories = [
     { text: 'Story 1', coinsEarned: 20, title:'title1' },
     { text: 'Story 2', coinsEarned: 30, title:'title2' },
     { text: 'Story 3', coinsEarned: 50, title:'title3' },
   ];
 
+  const [username, setUsername] = useState("");
+  const [balance, setBalance] = useState(0);
+  // const [stories, setStories] = useState([]);
+
   const [storyBetTopic, setStoryBetTopic] = useState("");
   const [showModal, setShowModal] = useState(false);
 
+  useEffect(() => {
+    const loadUserData = async () => {
+      const addr = await signer.getAddress();
+      const userVoteBalance = await storyBet.getUserVote(addr);
+      // const userStories = await storyBet.getUserStory(addr);
+      setUsername(addr);
+      setBalance(userVoteBalance.toString());
+      // setStories(userStories);
+    };
+    loadUserData();
+  }, [signer, storyBet]);
 
   function handleClearStories() {
     confirm({
@@ -43,12 +58,12 @@ const MyDashboard = () => {
         <Layout>
             <Content style={{ padding: '50px' }}>
                 <Card style={{ borderRadius: '15px', boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)' }}>
-                <Avatar size={64} style={{ backgroundColor: '#87d068' }}>
-                    {username.charAt(0)}
+                <Avatar size={64} style={{ backgroundColor: '#0055B7' }}>
+                  {username.slice(0, 4)}
                 </Avatar>
                 <h2 style={{ marginTop: '10px' }}>{username}</h2>
                 <p style={{ marginBottom: '0px' }}>
-                    Coins: <strong>{coins}</strong>
+                    Coins: <strong>{balance / 10**17}</strong> = {balance} wei
                 </p>
                 </Card>
                 <h2 style={{ marginTop: '20px' }}>My Stories</h2>

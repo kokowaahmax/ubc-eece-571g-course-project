@@ -73,7 +73,7 @@
               </div>
               
               {/* Render the comments as a list */}
-              {story.comments.length > 0 && (
+              {story.comment && story.comments.length > 0 && (
                 <List
                   dataSource={story.comments}
                   renderItem={(item) => (

@@ -4,7 +4,7 @@ import './App.css';
 import React,  { useState, useEffect }from "react";
 import { ethers } from 'ethers';
 import { Layout, Button } from "antd";
-import { ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
+import { UserOutlined } from '@ant-design/icons';
 import { Link, Routes, Route  } from 'react-router-dom';
 import { AppRouter } from './AppRouter';
 
@@ -17,9 +17,11 @@ import StoryList from "./components/StoryList"
 import StoryForm from "./components/StoryForm"
 import TitleCard from './components/TitleCard';
 import MyDashboard from './components/MyDashboard'
+import BuyTokenButton from './components/BuyTokenButton';
 
 const { Header, Content, Footer } = Layout;
-
+// TODO: input your contract address
+const storyBetAddress = '';
 
 function App() {
   const [storyBet, setStoryBet] = useState();
@@ -42,7 +44,7 @@ function App() {
       // get the contract instance
       const _storyBet = new ethers.Contract(
         // TODO: 
-        'insert your contract address',
+        storyBetAddress,
         StoryBet.abi,
         _signer
       );
@@ -56,13 +58,28 @@ function App() {
       if (storyBet?.address !== _storyBet.address) {
         setStoryBet(_storyBet);
       }
-
-      console.log(signer.getAddress());
-      console.log(storyBet.userStory);
     }
 
     init();
   }, [provider, signer, storyBet]);
+
+  useEffect(() => {
+    if (storyBet) {
+      const eventFilter = storyBet.filters.StoryAdded();
+
+      const handleStoryAdded = async (tags, title, publishedDateTime, storyText) => {
+        const newStory = { tags, title, publishedDateTime, storyText };
+        setStories(prevStories => [...prevStories, newStory]);
+      };
+
+      storyBet.on(eventFilter, handleStoryAdded);
+
+      return () => {
+        storyBet.off(eventFilter, handleStoryAdded);
+      };
+    }
+  }, [storyBet]);
+
 
   function addStory(newStory) {
     storyBet.createStory([`${newStory.author}`], ["title1"], Date.now(), newStory.text);
@@ -111,7 +128,8 @@ function App() {
                   Connect Wallet
                 </Button>
               )}
-                <Button icon={<ShoppingCartOutlined/>}>Buy Token</Button>
+                {/* <Button icon={<ShoppingCartOutlined/>}>Buy Token</Button> */}
+                <BuyTokenButton storyBet={storyBet}/>
               </div>
             </div>
           </Header>
@@ -126,7 +144,7 @@ function App() {
               </>} />
               <Route path='/dashboard' element={
                 <>
-                  <MyDashboard/>
+                  <MyDashboard signer={signer} storyBet={storyBet}/>
                 </>
               }/>
             </Routes>

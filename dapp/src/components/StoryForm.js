@@ -10,9 +10,14 @@ function StoryForm({ addStory, provider, storyBet }) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    addStory({ text, author });
-    setText("");
-    setAuthor("");
+    if (text && author) {
+      addStory({ text, author });
+      setText("");
+      setAuthor("");
+    } else {
+      setText("");
+      setAuthor("");
+    }
   }
 
   return (

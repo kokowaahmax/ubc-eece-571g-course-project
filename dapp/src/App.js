@@ -7,6 +7,7 @@ import { Layout, Button, message } from "antd";
 import { UserOutlined } from '@ant-design/icons';
 import { Link, Routes, Route  } from 'react-router-dom';
 import { AppRouter } from './AppRouter';
+import isEqual from 'lodash/isEqual';
 
 
 // import ABI code to interact with the smart contract
@@ -58,10 +59,17 @@ function App() {
       if (storyBet?.address !== _storyBet.address) {
         setStoryBet(_storyBet);
       }
+
+      if (_storyBet) {
+        const _initStories = await _storyBet.getStories();
+        if (stories.length != _initStories.length) {
+          setStories(_initStories);
+        }
+      }
     }
 
     init();
-  }, [provider, signer, storyBet]);
+  }, [provider, signer, storyBet, stories]);
 
   useEffect(() => {
     if (storyBet) {
@@ -85,7 +93,7 @@ function App() {
           storyText,
           comments,
           exist };
-        console.log(newStory);
+        // console.log(newStory);
         setStories(prevStories => [...prevStories, newStory]);
       };
 
@@ -156,7 +164,7 @@ function App() {
               <Route path='/' element={<>
                 <TitleCard />
                 <StoryForm addStory={addStory} provider={provider} storyBet = {storyBet} />
-                <StoryList stories={stories} setStories={setStories} />
+                <StoryList stories={stories} setStories={setStories} storyBet={storyBet}/>
               </>} />
               <Route path='/dashboard' element={
                 <>

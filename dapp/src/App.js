@@ -21,7 +21,7 @@ import BuyTokenButton from './components/BuyTokenButton';
 
 const { Header, Content, Footer } = Layout;
 // TODO: input your contract address
-const storyBetAddress = '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0';
+const storyBetAddress = '0x8A791620dd6260079BF849Dc5567aDC3F2FdC318';
 
 function App() {
   const [storyBet, setStoryBet] = useState();
@@ -156,7 +156,7 @@ function App() {
               <Route path='/' element={<>
                 <TitleCard />
                 <StoryForm addStory={addStory} provider={provider} storyBet = {storyBet} />
-                <StoryList stories={stories} setStories={setStories} />
+                <StoryList stories={stories} setStories={setStories} storyBet = {storyBet}/>
               </>} />
               <Route path='/dashboard' element={
                 <>

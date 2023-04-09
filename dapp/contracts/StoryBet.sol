@@ -40,7 +40,19 @@ contract StoryBet {
         bool exist
     );
 
+event StoryAdded2(
+        address ownerAddress,
+        uint numVote,
+        string[] tags,
+        string[] storyTitle,
+        uint256 publishedDateTime,
+        string storyText,
+        string[] comments,
+        bool exist
+    );
+
     event CommentAdded(address ownerAddress,  string storyText);
+    event voteAdded(address ownerAddress, uint numVote);
     
     function createStory(string[] memory _tags, string[] memory _storyTitle,uint256 _publishedDateTime, string memory _storyText) public payable {
 
@@ -90,10 +102,12 @@ contract StoryBet {
         userVoteBalance[address(this)] += numVote * votePrice;
         userStory[storyOwner].numVote += numVote;
         uint256 l = stories.length;
-        
+        emit StoryAdded2(msg.sender, userStory[storyOwner].numVote, userStory[storyOwner].tags, userStory[storyOwner].storyTitle, userStory[storyOwner].publishedDateTime, userStory[storyOwner].storyText, userStory[storyOwner].comments, true);
         for (uint i = 0; i < l; i++){
             if(stories[i].ownerAddress == storyOwner){
                 stories[i].numVote += numVote;
+                
+                //emit StoryAdded(msg.sender, stories[i].numVote, stories[i].tags, stories[i].storyTitle, stories[i].publishedDateTime, stories[i].storyText, stories[i].comments, true);
             }
         }
         

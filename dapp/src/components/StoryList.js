@@ -60,11 +60,19 @@
   
     //storyid = date
     const handleVoteButtonClick = async(storyId) => {
-      //const storyIndex = stories.findIndex((s) => parseInt(ethers.utils.formatUnits(s.publishedDateTime,0)) === storyId);
-      //const story = { ...stories[storyIndex] }; // Create a copy of the story object
+      const storyIndex = stories.findIndex((s) => parseInt(ethers.utils.formatUnits(s.publishedDateTime,0)) === storyId);
+      const story = { ...stories[storyIndex] }; // Create a copy of the story object
+      //console.log(story.ownerAddress);
+      //console.log(story);
+      //console.log(story.numVote);
 
-      await storyBet.vote(1, storyId);
-
+      //console.log( parseInt(story.numVote.toString(), 10));
+      story.votes = parseInt(story.numVote.toString(), 10);
+      //console.log(story.votes);
+      //console.log(typeof story.votes);
+      //console.log(story.votes > 0);
+      await storyBet.vote(1, story.ownerAddress);
+      
     };
 
     return (
@@ -142,10 +150,11 @@
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    color: story.votes > 0 ? '#DAA520' : 'inherit'
+                    
+                    color: parseInt(story.numVote.toString(), 10) > 0 ? '#DAA520' : 'inherit'
                   }}
                 >
-                  {story.votes > 0 && <span style={{ marginLeft: '2px' }}>{story.votes}</span>}
+                  {parseInt(story.numVote.toString(), 10) > 0 && <span style={{ marginLeft: '2px' }}>{parseInt(story.numVote.toString(), 10)}</span>}
                 </Button>
                 <Button
                   shape="circle"

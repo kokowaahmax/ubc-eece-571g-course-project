@@ -91,10 +91,11 @@ contract StoryBet {
         userVoteBalance[address(this)] += numVote * votePrice;
         userStory[storyOwner].numVote += numVote;
         uint256 l = stories.length;
-        emit StoryAdded(msg.sender, userStory[storyOwner].numVote, userStory[storyOwner].tags, userStory[storyOwner].storyTitle, userStory[storyOwner].publishedDateTime, userStory[storyOwner].storyText, userStory[storyOwner].comments, true);
+        //emit StoryAdded(msg.sender, userStory[storyOwner].numVote, userStory[storyOwner].tags, userStory[storyOwner].storyTitle, userStory[storyOwner].publishedDateTime, userStory[storyOwner].storyText, userStory[storyOwner].comments, true);
         for (uint i = 0; i < l; i++){
             if(stories[i].ownerAddress == storyOwner){
                 stories[i].numVote += numVote;
+                
                 //emit StoryAdded(msg.sender, stories[i].numVote, stories[i].tags, stories[i].storyTitle, stories[i].publishedDateTime, stories[i].storyText, stories[i].comments, true);
             }
         }

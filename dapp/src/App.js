@@ -21,7 +21,7 @@ import BuyTokenButton from './components/BuyTokenButton';
 
 const { Header, Content, Footer } = Layout;
 // TODO: input your contract address
-const storyBetAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
+const storyBetAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
 function App() {
   const [storyBet, setStoryBet] = useState();
@@ -97,6 +97,51 @@ function App() {
     }
   }, [storyBet]);
 
+  useEffect(() => {
+    if (storyBet) {
+      const eventFilter2 = storyBet.filters.StoryAdded2();
+
+      const handleStoryAdded2 = async (
+        ownerAddress,
+        numVote,
+        tags,
+        storyTitle,
+        publishedDateTime,
+        storyText,
+        comments,
+        exist) => {
+        const newStory = { 
+          ownerAddress,
+          numVote,
+          tags,
+          storyTitle,
+          publishedDateTime,
+          storyText,
+          comments,
+          exist };
+        console.log(newStory);
+        
+        const storyIndex = stories.findIndex((s) => parseInt(ethers.utils.formatUnits(s.publishedDateTime,0)) === parseInt(ethers.utils.formatUnits(newStory.publishedDateTime,0)));
+        const story = { ...stories[storyIndex] }; 
+        console.log(story);
+        story.numVote = parseInt(newStory.numVote.toString(), 10);
+        console.log(story.numVote);
+         // Create a new array with the updated story object
+        const updatedStories = [...stories];
+        updatedStories[storyIndex] = story;
+      
+        const sortedStories = [...updatedStories].sort((a, b) => b.votes - a.votes);
+      // Update the state with the new array
+        setStories(sortedStories);
+      };
+
+      storyBet.on(eventFilter2, handleStoryAdded2);
+
+      return () => {
+        storyBet.off(eventFilter2, handleStoryAdded2);
+      };
+    }
+  }, [storyBet]);
 
   function addStory(newStory) {
     storyBet.createStory([`${newStory.author}`], ["title1"], Date.now(), newStory.text);

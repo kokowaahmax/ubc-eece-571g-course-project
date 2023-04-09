@@ -40,6 +40,17 @@ contract StoryBet {
         bool exist
     );
 
+event StoryAdded2(
+        address ownerAddress,
+        uint numVote,
+        string[] tags,
+        string[] storyTitle,
+        uint256 publishedDateTime,
+        string storyText,
+        string[] comments,
+        bool exist
+    );
+
     event CommentAdded(address ownerAddress,  string storyText);
     event voteAdded(address ownerAddress, uint numVote);
     
@@ -91,7 +102,7 @@ contract StoryBet {
         userVoteBalance[address(this)] += numVote * votePrice;
         userStory[storyOwner].numVote += numVote;
         uint256 l = stories.length;
-        //emit StoryAdded(msg.sender, userStory[storyOwner].numVote, userStory[storyOwner].tags, userStory[storyOwner].storyTitle, userStory[storyOwner].publishedDateTime, userStory[storyOwner].storyText, userStory[storyOwner].comments, true);
+        emit StoryAdded2(msg.sender, userStory[storyOwner].numVote, userStory[storyOwner].tags, userStory[storyOwner].storyTitle, userStory[storyOwner].publishedDateTime, userStory[storyOwner].storyText, userStory[storyOwner].comments, true);
         for (uint i = 0; i < l; i++){
             if(stories[i].ownerAddress == storyOwner){
                 stories[i].numVote += numVote;

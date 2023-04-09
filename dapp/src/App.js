@@ -21,7 +21,7 @@ import BuyTokenButton from './components/BuyTokenButton';
 
 const { Header, Content, Footer } = Layout;
 // TODO: input your contract address
-const storyBetAddress = '';
+const storyBetAddress = '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0';
 
 function App() {
   const [storyBet, setStoryBet] = useState();
@@ -67,9 +67,25 @@ function App() {
     if (storyBet) {
       const eventFilter = storyBet.filters.StoryAdded();
 
-      const handleStoryAdded = async (tags, title, publishedDateTime, storyText, comments, ownerAddress) => {
-        const newStory = { tags, title, publishedDateTime, storyText, comments, ownerAddress };
-        // console.log(newStory);
+      const handleStoryAdded = async (
+        ownerAddress,
+        numVote,
+        tags,
+        storyTitle,
+        publishedDateTime,
+        storyText,
+        comments,
+        exist) => {
+        const newStory = { 
+          ownerAddress,
+          numVote,
+          tags,
+          storyTitle,
+          publishedDateTime,
+          storyText,
+          comments,
+          exist };
+        console.log(newStory);
         setStories(prevStories => [...prevStories, newStory]);
       };
 

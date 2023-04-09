@@ -16,18 +16,24 @@
       setShowCommentInput(true);
     };
 
-    const handleCommentSubmit = (storyId) => {
+    const handleCommentSubmit = async(storyId) => {
       // Find the story with the matching ID
-      const story = stories.find((s) => s.publishedDateTime === storyId);
+      const newStoryIndex = stories.findIndex((s) => s.publishedDateTime === storyId);
     
       // Create a new comment object and add it to the story's comments array
       if (comment) {
-        const newComment = { text: comment };
-        // story.comments.push(newComment);
-        const updatedComments = [...story.comments, newComment]
-        story.comments = updatedComments;
-        // console.log(story.comments)
-        
+        const newComment = comment;
+        const updatedComments = [...stories[newStoryIndex].comments, newComment];
+        const updatedStory = { ...stories[newStoryIndex], comments: updatedComments };
+
+        const updatedStories = stories.map((s) => {
+          if (s.publishedDateTime === updatedStory.publishedDateTime) {
+            return updatedStory;
+          }
+          return s;
+        });
+        await storyBet.comment(updatedStory.ownerAddress, comment, updatedStory.publishedDateTime);
+        setStories(updatedStories);
       }
     
       // Reset comment state and hide input field
@@ -97,7 +103,7 @@
               {story.comments && story.comments.length > 0 && (
                 <List
                   dataSource={story.comments}
-                  renderItem={(item) => (
+                  renderItem={(comment) => (
                     <List.Item>
                       <Card
                         style={{ 
@@ -107,7 +113,7 @@
                           width: '100%'
                         }}
                       >
-                        <p style={{ margin: 0 }}>{item.text}</p>
+                        <p style={{ margin: 0 }}>{comment}</p>
                       </Card>
                     </List.Item>
                   )}
@@ -115,7 +121,7 @@
                 />
               )}
 
-              {showCommentInput && story.id === selectedStoryId && (
+              {showCommentInput && story.publishedDateTime === selectedStoryId && (
                 <div>
                   <TextArea
                     value={comment}
@@ -153,7 +159,7 @@
                 <Button
                   shape="circle"
                   icon={<CommentOutlined />}
-                  onClick={() => handleCommentButtonClick(story.id)}
+                  onClick={() => handleCommentButtonClick(story.publishedDateTime)}
                 />
               </div>
             </Card>

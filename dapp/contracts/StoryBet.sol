@@ -192,13 +192,17 @@ event StoryAdded2(
         }
     }
 
-    function comment(address storyOwner, string memory storyText) public {
+    function comment(address storyOwner, string memory storyText, uint256 publishedDateTime) public {
         userStory[storyOwner].comments.push(storyText);
-        emit CommentAdded(storyOwner, storyText);
-
+        for (uint i = 0; i < stories.length; i++) {
+            if (stories[i].publishedDateTime == publishedDateTime) {
+                stories[i].comments.push(storyText);
+            }
+        }
     }
 
     function getStories() public view returns (Story[] memory) {
+        // return stories;
         return stories;
     }
 

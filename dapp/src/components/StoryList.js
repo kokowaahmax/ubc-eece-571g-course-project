@@ -63,7 +63,7 @@
       const storyIndex = stories.findIndex((s) => parseInt(ethers.utils.formatUnits(s.publishedDateTime,0)) === storyId);
       const story = { ...stories[storyIndex] }; // Create a copy of the story object
       //console.log(story.ownerAddress);
-      //console.log(story);
+      console.log(story);
       //console.log(story.numVote);
 
       //console.log( parseInt(story.numVote.toString(), 10));
@@ -71,7 +71,7 @@
       //console.log(story.votes);
       //console.log(typeof story.votes);
       //console.log(story.votes > 0);
-      await storyBet.vote(1, story.ownerAddress);
+      await storyBet.vote(1, story.ownerAddress, story.publishedDateTime);
       
     };
 

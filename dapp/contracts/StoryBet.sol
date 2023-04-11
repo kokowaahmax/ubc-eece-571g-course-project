@@ -17,6 +17,7 @@ contract StoryBet {
     mapping(address => Story) public userStory;
     mapping(address => uint256) public userVoteBalance;
 
+
     address owner;
     address[] public users;
     Story[] stories;
@@ -95,19 +96,19 @@ event StoryAdded2(
         payable(msg.sender).transfer(votePrice * _refundVoteNum);
     }
 
-    function vote(uint numVote, address storyOwner) public payable{
+    function vote(uint numVote, address storyOwner, uint256 publishedDateTime) public payable{
         require(userStory[storyOwner].exist == true, "User must have story to be voted");
         require(numVote <= userVoteBalance[msg.sender], "ensure adequate account balances");
         userVoteBalance[msg.sender] -= numVote * votePrice;
         userVoteBalance[address(this)] += numVote * votePrice;
         userStory[storyOwner].numVote += numVote;
         uint256 l = stories.length;
-        emit StoryAdded2(msg.sender, userStory[storyOwner].numVote, userStory[storyOwner].tags, userStory[storyOwner].storyTitle, userStory[storyOwner].publishedDateTime, userStory[storyOwner].storyText, userStory[storyOwner].comments, true);
+        //emit StoryAdded2(userStory[storyOwner].ownerAddress, userStory[storyOwner].numVote, userStory[storyOwner].tags, userStory[storyOwner].storyTitle, userStory[storyOwner].publishedDateTime, userStory[storyOwner].storyText, userStory[storyOwner].comments, true);
         for (uint i = 0; i < l; i++){
-            if(stories[i].ownerAddress == storyOwner){
+            if(stories[i].publishedDateTime == publishedDateTime){
                 stories[i].numVote += numVote;
                 
-                //emit StoryAdded(msg.sender, stories[i].numVote, stories[i].tags, stories[i].storyTitle, stories[i].publishedDateTime, stories[i].storyText, stories[i].comments, true);
+                emit StoryAdded2(stories[i].ownerAddress, stories[i].numVote, stories[i].tags, stories[i].storyTitle, stories[i].publishedDateTime, stories[i].storyText, stories[i].comments, true);
             }
         }
         

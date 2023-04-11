@@ -93,7 +93,8 @@ function App() {
           storyText,
           comments,
           exist };
-        // console.log(newStory);
+        console.log("create");
+        console.log(newStory);
         setStories(prevStories => [...prevStories, newStory]);
       };
 
@@ -127,13 +128,19 @@ function App() {
           storyText,
           comments,
           exist };
+        console.log("vote");
         console.log(newStory);
-        
+        console.log(stories);
+        console.log(parseInt(ethers.utils.formatUnits(newStory.publishedDateTime,0)));
         const storyIndex = stories.findIndex((s) => parseInt(ethers.utils.formatUnits(s.publishedDateTime,0)) === parseInt(ethers.utils.formatUnits(newStory.publishedDateTime,0)));
         const story = { ...stories[storyIndex] }; 
+        console.log(storyIndex);
         console.log(story);
+        console.log(story.numVote);
         story.numVote = parseInt(newStory.numVote.toString(), 10);
         console.log(story.numVote);
+        
+        //console.log(stories[1]);
          // Create a new array with the updated story object
         const updatedStories = [...stories];
         updatedStories[storyIndex] = story;

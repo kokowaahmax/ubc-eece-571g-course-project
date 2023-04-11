@@ -1,28 +1,21 @@
 import React, { useState, useEffect  } from "react";
 import { Layout, Card, Avatar, Button, Input, Modal, message, InputNumber } from 'antd';
-import { ethers } from 'ethers';
+import { BigNumber } from 'ethers';
 
-const { Header, Content } = Layout;
+const { Content } = Layout;
 const { confirm } = Modal;
 
-const MyDashboard = ({signer, storyBet}) => {
-  // const username = 'John Doe';
-  // const coins = 100;
-  const stories = [
-    { text: 'Story 1', coinsEarned: 20, title:'title1' },
-    { text: 'Story 2', coinsEarned: 30, title:'title2' },
-    { text: 'Story 3', coinsEarned: 50, title:'title3' },
-  ];
+const MyDashboard = ({signer, storyBet, topic, setTopic}) => {
 
   const [username, setUsername] = useState("");
   const [balance, setBalance] = useState(0);
-  // const [stories, setStories] = useState([]);
 
-  const [storyBetTopic, setStoryBetTopic] = useState("");
   const [showModal, setShowModal] = useState(false);
 
   const [refundVoteNum, setRefundVoteNum] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userStories, setUserStories] = useState([]);
+  const [isUserAdmin, setUserAdmin] = useState(false);
 
   function handleRefundTokenClick() {
     setIsModalOpen(true);
@@ -37,9 +30,9 @@ const MyDashboard = ({signer, storyBet}) => {
     try {
       const transaction = await storyBet.refundVote(refundVoteNum);
       await transaction.wait();
-      message.success("Transaction confirmed");
+      message.success("Your refund has submitted!");
     } catch (error) {
-      message.error(error.message);
+      message.error("Can't refund! Do you have enough balance left in storyBet?");
     }
   }
 
@@ -48,13 +41,15 @@ const MyDashboard = ({signer, storyBet}) => {
     const loadUserData = async () => {
       const addr = await signer.getAddress();
       const userVoteBalance = await storyBet.getUserVote(addr);
-      // const userStories = await storyBet.getUserStory(addr);
+      const userStories = await storyBet.getAllUserStories(addr);
+      const adminAddress = await storyBet.getAdmin();
       setUsername(addr);
       setBalance(userVoteBalance.toString());
-      // setStories(userStories);
+      setUserStories(userStories);
+      setUserAdmin(adminAddress === addr);
     };
     loadUserData();
-  }, [signer, storyBet]);
+  }, [signer, storyBet, isUserAdmin]);
 
   function handleClearStories() {
     confirm({
@@ -67,15 +62,13 @@ const MyDashboard = ({signer, storyBet}) => {
   }
 
   function handleChangeTopic(value) {
-    setStoryBetTopic(value);
+    setTopic(value);
   }
 
   function handleSaveTopic() {
     // TODO: Save the new topic to the database
     setShowModal(false);
   }
-
-  const isUserAdmin = true;
 
   return (
     <>
@@ -107,23 +100,27 @@ const MyDashboard = ({signer, storyBet}) => {
               </div>
             </Card>
                 <h2 style={{ marginTop: '20px' }}>My Stories</h2>
-                {stories.map((story) => (
-                <Card key={story.text} style={{ marginTop: '10px',  borderRadius: '15px', boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)' }}>
+                {userStories.map((story) => (
+                <Card key={story.publishedDateTime} style={{ marginTop: '10px',  borderRadius: '15px', boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)' }}>
                     <p style={{ marginBottom: '0px' }}>
-                    Story Title: <strong>{story.title}</strong>
+                    Story Topic: <strong>{story.storyTitle}</strong>
                     </p>
                     <p style={{ marginBottom: '0px' }}>
-                    Story: <strong>{story.text}</strong>
+                    Story: <strong>{story.storyText}</strong>
                     </p>
                     <p style={{ marginBottom: '0px' }}>
-                    Coins earned: <strong>{story.coinsEarned}</strong>
+                    Number of votes: <strong>{BigNumber.from(story.numVote).toNumber()}</strong>
                     </p>
-
+                    <p style={{ marginBottom: '0px' }}>
+                    Date of creation: <strong>{new Date(BigNumber.from(story.publishedDateTime).toNumber()).toDateString()}</strong>
+                    </p>
                 </Card>
                 ))}
                 {isUserAdmin && (
                     <>
                     <br/>
+                    <Card style={{ marginTop: '10px',  borderRadius: '15px', boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)', backgroundColor: 'orange' }}>
+                    <h2 style={{ marginTop: '20px' }}>Admin Area</h2>
                     <Button onClick={handleClearStories}>
                         Clear All Stories
                     </Button>
@@ -134,16 +131,28 @@ const MyDashboard = ({signer, storyBet}) => {
                     </Button>
                     <Modal
                         title="Change StoryBet Topic"
-                        visible={showModal}
+                        open={showModal}
                         onOk={handleSaveTopic}
                         onCancel={() => setShowModal(false)}
                     >
                         <Input
-                        placeholder="Enter new topic"
-                        value={storyBetTopic}
+                        placeholder={topic}
+                        value={topic}
                         onChange={(e) => handleChangeTopic(e.target.value)}
+                        maxLength={1000}
+                        style={{ 
+                          marginTop: '10px',
+                          width: '100%',
+                          height: '50px',
+                          fontSize: '16px',
+                          borderRadius: '15px',
+                          boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)',
+                          padding: '10px',
+                          boxSizing: 'border-box'
+                        }}
                         />
                     </Modal>
+                    </Card>
                     </>
             )}
             </Content>

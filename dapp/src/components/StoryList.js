@@ -1,4 +1,4 @@
-  import { Card, Button, Input, List } from "antd";
+  import { Card, Button, Input, List, message } from "antd";
   import React, { useState } from 'react';
   import { ethers } from 'ethers';
   import { CrownOutlined, DollarCircleOutlined, CommentOutlined} from '@ant-design/icons';
@@ -40,39 +40,18 @@
       setComment('');
       setShowCommentInput(false);
     };
-
-    const handleDollarButtonClick = (storyId) => {
-      // Find the story with the matching ID
-      const storyIndex = stories.findIndex((s) => s.id === storyId);
-      const story = { ...stories[storyIndex] }; // Create a copy of the story object
-    
-      // Update the votes for the selected story
-      story.votes += 1;
-    
-      // Create a new array with the updated story object
-      const updatedStories = [...stories];
-      updatedStories[storyIndex] = story;
-      
-      const sortedStories = [...updatedStories].sort((a, b) => b.votes - a.votes);
-      // Update the state with the new array
-      setStories(sortedStories);
-    };
   
     //storyid = date
     const handleVoteButtonClick = async(storyId) => {
-      const storyIndex = stories.findIndex((s) => parseInt(ethers.utils.formatUnits(s.publishedDateTime,0)) === storyId);
+      const storyIndex = stories.findIndex((s) => s.publishedDateTime === storyId);
       const story = { ...stories[storyIndex] }; // Create a copy of the story object
-      //console.log(story.ownerAddress);
-      //console.log(story);
-      //console.log(story.numVote);
-
-      //console.log( parseInt(story.numVote.toString(), 10));
-      story.votes = parseInt(story.numVote.toString(), 10);
-      //console.log(story.votes);
-      //console.log(typeof story.votes);
-      //console.log(story.votes > 0);
-      await storyBet.vote(1, story.ownerAddress);
-      
+      // story.numVote = parseInt(story.numVote.toString(), 10);
+      try {
+        await storyBet.vote(1, story.ownerAddress, story.publishedDateTime);
+        message.success("Your vote is submitted!")
+      } catch (error) {
+        message.error("Can't vote! Do you have enough coins?")
+      }
     };
 
     return (
@@ -139,10 +118,10 @@
                 </div>
               )}
               <div style={{ position: 'absolute', bottom: '10px', right: '10px', display: 'flex', gap: '10px' }}>
-              <Button
+               <Button
                   shape="circle"
                   icon={<DollarCircleOutlined />}
-                  onClick={() => handleVoteButtonClick(parseInt(ethers.utils.formatUnits(story.publishedDateTime, 0)))}
+                  onClick={() => handleVoteButtonClick(story.publishedDateTime)}
                   style={{
                     borderRadius: '45%',
                     width: '38px',

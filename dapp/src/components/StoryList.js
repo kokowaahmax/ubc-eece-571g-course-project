@@ -45,7 +45,7 @@
       // Find the story with the matching ID
       const storyIndex = stories.findIndex((s) => s.id === storyId);
       const story = { ...stories[storyIndex] }; // Create a copy of the story object
-    
+     
       // Update the votes for the selected story
       story.votes += 1;
     
@@ -64,6 +64,7 @@
       const story = { ...stories[storyIndex] }; // Create a copy of the story object
       //console.log(story.ownerAddress);
       console.log(story);
+      console.log(stories);
       //console.log(story.numVote);
 
       //console.log( parseInt(story.numVote.toString(), 10));

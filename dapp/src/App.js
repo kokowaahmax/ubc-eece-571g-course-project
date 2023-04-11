@@ -128,7 +128,7 @@ function App() {
           storyText,
           comments,
           exist };
-        console.log("vote");
+        console.log("-------------vote-------------");
         console.log(newStory);
         console.log(stories);
         console.log(parseInt(ethers.utils.formatUnits(newStory.publishedDateTime,0)));
@@ -145,7 +145,7 @@ function App() {
         const updatedStories = [...stories];
         updatedStories[storyIndex] = story;
       
-        const sortedStories = [...updatedStories].sort((a, b) => b.votes - a.votes);
+        const sortedStories = [...updatedStories].sort((a, b) => b.numVote - a.numVote);
       // Update the state with the new array
         setStories(sortedStories);
       };

@@ -1,13 +1,9 @@
 // node requirements
-import logo from './logo.svg';
 import './App.css';
 import React,  { useState, useEffect }from "react";
-import { ethers } from 'ethers';
+import { ethers, BigNumber } from 'ethers';
 import { Layout, Button, message } from "antd";
 import { UserOutlined } from '@ant-design/icons';
-import { Link, Routes, Route  } from 'react-router-dom';
-import { AppRouter } from './AppRouter';
-import isEqual from 'lodash/isEqual';
 
 
 // import ABI code to interact with the smart contract
@@ -22,7 +18,7 @@ import BuyTokenButton from './components/BuyTokenButton';
 
 const { Header, Content, Footer } = Layout;
 // TODO: input your contract address
-const storyBetAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+const storyBetAddress = '0xE6E340D132b5f46d1e472DebcD681B2aBc16e57E';
 
 function App() {
   const [storyBet, setStoryBet] = useState();
@@ -33,6 +29,7 @@ function App() {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const [topic, setTopic] = useState('Welcome to StoryBet! Are you ready to put your creativity to the test? We challenge you to write a short story with at most 100 characters, starting with "I love to eat carbonara so much". The twist? The story should be unexpected and unique. The story with the most votes at the end of the competition will win all tokens in the pool. So what are you waiting for? Let us start writing!');
 
   useEffect(() => {
     async function init() {
@@ -62,17 +59,18 @@ function App() {
 
       if (_storyBet) {
         const _initStories = await _storyBet.getStories();
-        if (stories.length != _initStories.length) {
-          setStories(_initStories);
-        }
+        console.log("init line 62");
+        console.log(stories);
+        setStories(_initStories);
       }
     }
 
     init();
-  }, [provider, signer, storyBet, stories]);
+  }, [provider, signer, storyBet]);
 
   useEffect(() => {
     if (storyBet) {
+      console.log("init line 73");
       const eventFilter = storyBet.filters.StoryAdded();
 
       const handleStoryAdded = async (
@@ -93,7 +91,6 @@ function App() {
           storyText,
           comments,
           exist };
-        // console.log(newStory);
         setStories(prevStories => [...prevStories, newStory]);
       };
 
@@ -103,10 +100,11 @@ function App() {
         storyBet.off(eventFilter, handleStoryAdded);
       };
     }
-  }, [storyBet]);
+  }, [storyBet, stories]);
 
   useEffect(() => {
     if (storyBet) {
+      console.log("init line 106");
       const eventFilter2 = storyBet.filters.StoryAdded2();
 
       const handleStoryAdded2 = async (
@@ -127,20 +125,16 @@ function App() {
           storyText,
           comments,
           exist };
-        console.log(newStory);
-        
-        const storyIndex = stories.findIndex((s) => parseInt(ethers.utils.formatUnits(s.publishedDateTime,0)) === parseInt(ethers.utils.formatUnits(newStory.publishedDateTime,0)));
-        const story = { ...stories[storyIndex] }; 
-        console.log(story);
-        story.numVote = parseInt(newStory.numVote.toString(), 10);
-        console.log(story.numVote);
          // Create a new array with the updated story object
-        const updatedStories = [...stories];
-        updatedStories[storyIndex] = story;
-      
-        const sortedStories = [...updatedStories].sort((a, b) => b.votes - a.votes);
+        const updatedStories = stories.map((s) => {
+        if (s.publishedDateTime.toNumber() === newStory.publishedDateTime.toNumber()) {
+          return newStory;
+        } else {
+          return s;
+        }
+        }).sort((a, b) => b.numVote.toNumber() - a.numVote.toNumber());
       // Update the state with the new array
-        setStories(sortedStories);
+        setStories(updatedStories);
       };
 
       storyBet.on(eventFilter2, handleStoryAdded2);
@@ -149,79 +143,84 @@ function App() {
         storyBet.off(eventFilter2, handleStoryAdded2);
       };
     }
-  }, [storyBet]);
+  }, [storyBet, stories]);
 
-  function addStory(newStory) {
-    storyBet.createStory([`${newStory.author}`], ["title1"], Date.now(), newStory.text);
+  async function addStory(newStory) {
+    try {
+      await storyBet.createStory([`${newStory.author}`], [`${topic}`], Date.now(), newStory.text);
+    } catch (error) {
+      message.error("Can't submit a story. Do you have enough token?");
+    }
   }
 
-  const handleClickMenuItem = (e) => {
-    setCurrentMenuItem(e.key);
+  const handleClickMenuItem = (text) => {
+    console.log(`switch menu item to ${text}`)
+    setCurrentMenuItem(text);
   };
 
    return (
-    <AppRouter basename='/'>
-      <div>
-        <Layout style={{ minHeight: "100vh" }}>
-          <Header style={{ position: 'fixed', zIndex: 1, width: '100%' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <Link to='/' style={{ marginRight: 15 }} key="storyBoard" onClick={{handleClickMenuItem}} className={currentMenuItem === "/" ? "active" : ""}>Story Board</Link>
-                <Link to='/dashboard' key="dashboard" onClick={{handleClickMenuItem}} className={currentMenuItem === "/dashboard" ? "active" : ""}>My Dashboard</Link>
-              </div>
-              <div>
-              {selectedAddress ? (
-                <Button style={{ marginRight: 8 }} icon={<UserOutlined />}>
-                  {selectedAddress.slice(0, 6) + "..." + selectedAddress.slice(-4)}
-                </Button>
-              ) : (
-                <Button
-                  style={{ marginRight: 8 }}
-                  icon={<UserOutlined />}
-                  onClick={
-                  async () => {
-                      try {
-                        await window.ethereum.request({ method: "eth_requestAccounts" });
-                        const provider = new ethers.providers.Web3Provider(window.ethereum);
-                        setProvider(provider);
-                        const signer = provider.getSigner();
-                        setSigner(signer);
-                        const selectedAddress = await signer.getAddress();
-                        setSelectedAddress(selectedAddress);
-                      } catch (error) {
-                        console.log(error);
-                      }
-                  }
-                  }
-                >
-                  Connect Wallet
-                </Button>
-              )}
-                {/* <Button icon={<ShoppingCartOutlined/>}>Buy Token</Button> */}
-                <BuyTokenButton storyBet={storyBet}/>
-              </div>
+    <div>
+      <Layout style={{ minHeight: "100vh" }}>
+        <Header style={{ position: 'fixed', zIndex: 1, width: '100%' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+                <Button style={{ marginRight: 8 }} onClick={() => handleClickMenuItem('storyBoard')}> 
+                Story Board
+              </Button>
+              <Button onClick={() => handleClickMenuItem('dashboard')}>
+                My Dashboard
+              </Button>
             </div>
-          </Header>
-          <Content
-          style={{ padding: "10px 50px", marginTop: 80, alignItems: 'center'}}
-          >
-            <Routes>
-              <Route path='/' element={<>
-                <TitleCard />
-                <StoryForm addStory={addStory} provider={provider} storyBet = {storyBet} />
-                <StoryList stories={stories} setStories={setStories} storyBet={storyBet}/>
-              </>} />
-              <Route path='/dashboard' element={
-                <>
-                  <MyDashboard signer={signer} storyBet={storyBet}/>
-                </>
-              }/>
-            </Routes>
-          </Content>
-          <Footer style={{ textAlign: "center" }}>EECE571G © WT2022/2023 Project Group 5 </Footer>
-        </Layout>
-      </div>
-    </AppRouter>
+            <div>
+            {selectedAddress ? (
+              <Button style={{ marginRight: 8 }} icon={<UserOutlined />}>
+                {selectedAddress.slice(0, 6) + "..." + selectedAddress.slice(-4)}
+              </Button>
+            ) : (
+              <Button
+                style={{ marginRight: 8 }}
+                icon={<UserOutlined />}
+                onClick={
+                async () => {
+                    try {
+                      await window.ethereum.request({ method: "eth_requestAccounts" });
+                      const provider = new ethers.providers.Web3Provider(window.ethereum);
+                      setProvider(provider);
+                      const signer = provider.getSigner();
+                      setSigner(signer);
+                      const selectedAddress = await signer.getAddress();
+                      setSelectedAddress(selectedAddress);
+                    } catch (error) {
+                      console.log(error);
+                    }
+                }
+                }
+              >
+                Connect Wallet
+              </Button>
+            )}
+              <BuyTokenButton storyBet={storyBet}/>
+            </div>
+          </div>
+        </Header>
+        <Content
+        style={{ padding: "10px 50px", marginTop: 80, alignItems: 'center'}}
+        >
+          {currentMenuItem === "dashboard" ? (
+            <>
+              <MyDashboard signer={signer} storyBet={storyBet} topic={topic} setTopic ={setTopic}/>
+            </>
+          ) : (
+            <>
+              <TitleCard topic={topic}/>
+              <StoryForm addStory={addStory} provider={provider} storyBet = {storyBet} />
+              <StoryList stories={stories} setStories={setStories} storyBet={storyBet}/> 
+            </>
+          )}
+        </Content>
+        <Footer style={{ textAlign: "center" }}>EECE571G © WT2022/2023 Project Group 5 </Footer>
+      </Layout>
+    </div>
   );
 }
 

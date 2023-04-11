@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Modal, InputNumber } from 'antd';
+import { Button, Modal, InputNumber, message } from 'antd';
 import { ShoppingCartOutlined } from '@ant-design/icons';
 import { ethers } from 'ethers';
 
@@ -29,12 +29,16 @@ function BuyTokenButton({storyBet}) {
       const votePrice = ethers.utils.parseEther('0.1');
       const amount = ethers.BigNumber.from(numVotes).mul(votePrice);
       // Send the transaction to the contract
-    const transaction = await storyBet.buyVote(numVotes, {
-        value: amount
-    });
-    
-    const receipt = await transaction.wait();
-    console.log(receipt);
+      try {
+        const transaction = await storyBet.buyVote(numVotes, {
+          value: amount
+      });
+      message.success("Your coins order is submitted!")
+      const receipt = await transaction.wait();
+      console.log(receipt);
+      } catch (error) {
+        message.error("Something went wrong!");
+      }
     } else {
       // User doesn't have MetaMask installed or not logged in
       alert('Please install MetaMask or log in to your account.');

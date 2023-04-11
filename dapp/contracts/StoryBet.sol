@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+import "hardhat/console.sol";
+
 contract StoryBet {
 
     struct Story {
@@ -19,7 +21,7 @@ contract StoryBet {
 
     address owner;
     address[] public users;
-    Story[] stories;
+    Story[] public stories;
 
     uint public votePrice;
 
@@ -50,9 +52,6 @@ event StoryAdded2(
         string[] comments,
         bool exist
     );
-
-    event CommentAdded(address ownerAddress,  string storyText);
-    event voteAdded(address ownerAddress, uint numVote);
     
     function createStory(string[] memory _tags, string[] memory _storyTitle,uint256 _publishedDateTime, string memory _storyText) public payable {
 
@@ -95,51 +94,36 @@ event StoryAdded2(
         payable(msg.sender).transfer(votePrice * _refundVoteNum);
     }
 
-    function vote(uint numVote, address storyOwner) public payable{
+    function vote(uint numVote, address storyOwner, uint256 publishedDateTime) public payable{
         require(userStory[storyOwner].exist == true, "User must have story to be voted");
         require(numVote <= userVoteBalance[msg.sender], "ensure adequate account balances");
+        console.log("into vote methods, the number is %s", numVote);
         userVoteBalance[msg.sender] -= numVote * votePrice;
         userVoteBalance[address(this)] += numVote * votePrice;
-        userStory[storyOwner].numVote += numVote;
-        uint256 l = stories.length;
-        emit StoryAdded2(msg.sender, userStory[storyOwner].numVote, userStory[storyOwner].tags, userStory[storyOwner].storyTitle, userStory[storyOwner].publishedDateTime, userStory[storyOwner].storyText, userStory[storyOwner].comments, true);
-        for (uint i = 0; i < l; i++){
-            if(stories[i].ownerAddress == storyOwner){
-                stories[i].numVote += numVote;
-                
-                //emit StoryAdded(msg.sender, stories[i].numVote, stories[i].tags, stories[i].storyTitle, stories[i].publishedDateTime, stories[i].storyText, stories[i].comments, true);
+
+        if (userStory[storyOwner].publishedDateTime == publishedDateTime) {
+            userStory[storyOwner].numVote += numVote;
+            emit StoryAdded2(storyOwner, userStory[storyOwner].numVote, userStory[storyOwner].tags, userStory[storyOwner].storyTitle, userStory[storyOwner].publishedDateTime, userStory[storyOwner].storyText, userStory[storyOwner].comments, true);
+
+            uint256 l = stories.length;
+            for (uint i = 0; i < l; i++){
+                if( stories[i].publishedDateTime == publishedDateTime ){
+                    stories[i].numVote += numVote;
+                }
+            }
+        } else {
+            uint256 l = stories.length;
+            for (uint i = 0; i < l; i++){
+                if( stories[i].publishedDateTime == publishedDateTime ){
+                    stories[i].numVote += numVote;
+                    emit StoryAdded2(storyOwner, stories[i].numVote, stories[i].tags, stories[i].storyTitle, stories[i].publishedDateTime, stories[i].storyText, stories[i].comments, true);
+                }
             }
         }
-        
-        // rankStories();
     }
 
     function summaryVotes() public payable {
         require(msg.sender == owner, "only the admin can end vote");
-         
-        uint topVote = 0;
-        address topUser = users[0];
-        uint totalVote = 0;
-
-        for (uint i = 0; i < users.length; i++){
-            if (getUserStoryExist(users[i]) == true)
-            {
-                totalVote += getUserStoryVote(users[i]);
-
-                if (getUserStoryVote(users[i]) >= topVote)
-                {
-                    topVote = getUserStoryVote(users[i]);
-                    topUser = users[i];
-                }
-            }
-        }
-
-        payable(topUser).transfer((address(this).balance));
-        userVoteBalance[topUser] += totalVote * votePrice;
-
-        //payable(owner).transfer(address(this).balance);//transfer money back to owner
-        
-        clearBoard();
     }
 
     function rankStories() public returns (Story[] memory) {
@@ -240,7 +224,24 @@ event StoryAdded2(
         return userStory[addr].tags;
     }
     
+    function getAllUserStories(address addr) public view returns (Story[] memory) {
+        uint storiesNum = 0;
 
-    
+        for (uint i = 0; i < stories.length; i++) {
+            if (stories[i].ownerAddress == addr) { storiesNum++; }
+        }
+
+        uint temp = 0;
+        Story[] memory returnValue = new Story[](storiesNum);
+
+        for (uint i = 0; i < stories.length; i++) {
+            if (stories[i].ownerAddress == addr) {
+                returnValue[temp] = stories[i];
+                temp++;
+            } 
+        }
+
+        return returnValue;
+    }
 
 }

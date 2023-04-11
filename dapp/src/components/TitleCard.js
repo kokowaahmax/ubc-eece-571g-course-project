@@ -3,7 +3,7 @@ import { Card, Typography } from 'antd';
 
 const { Title, Paragraph } = Typography;
 
-const TitleCard = () => {
+const TitleCard = ({topic}) => {
   return (
     <Card
       style={{
@@ -29,11 +29,11 @@ const TitleCard = () => {
         style={{  
           fontFamily: 'sans-serif',
           fontSize: '20px',
-          color: '#888',
+          color: '#97D4E9',
           marginTop: '10px',
         }}
       >
-        Welcome to StoryBet! Are you ready to put your creativity to the test? We challenge you to write a short story with at most 100 characters, starting with "I love to eat carbonara so much". The twist? The story should be unexpected and unique. The story with the most votes at the end of the competition will win all tokens in the pool. So what are you waiting for? Let's start writing!
+        {topic}
       </Paragraph>
     </Card>
   );

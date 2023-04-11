@@ -8,7 +8,8 @@ const { confirm } = Modal;
 const MyDashboard = ({signer, storyBet, topic, setTopic}) => {
 
   const [username, setUsername] = useState("");
-  const [balance, setBalance] = useState(0);
+  const [balance, setBalance] = useState("");
+  const [poolBalance, setPoolBalance] = useState("");
 
   const [showModal, setShowModal] = useState(false);
 
@@ -43,19 +44,21 @@ const MyDashboard = ({signer, storyBet, topic, setTopic}) => {
       const userVoteBalance = await storyBet.getUserVote(addr);
       const userStories = await storyBet.getAllUserStories(addr);
       const adminAddress = await storyBet.getAdmin();
+      const newPoolBalance = await storyBet.getBalance();
       setUsername(addr);
       setBalance(userVoteBalance.toString());
       setUserStories(userStories);
       setUserAdmin(adminAddress === addr);
+      setPoolBalance(newPoolBalance.toString());
     };
     loadUserData();
   }, [signer, storyBet, isUserAdmin]);
 
-  function handleClearStories() {
+  async function handleClearStories() {
     confirm({
       title: "Are you sure you want to clear all stories?",
-      onOk() {
-        // clearStories();
+      async onOk() {
+        await storyBet.summaryVotes();
       },
       onCancel() {},
     });
@@ -101,7 +104,15 @@ const MyDashboard = ({signer, storyBet, topic, setTopic}) => {
             </Card>
                 <h2 style={{ marginTop: '20px' }}>My Stories</h2>
                 {userStories.map((story) => (
-                <Card key={story.publishedDateTime} style={{ marginTop: '10px',  borderRadius: '15px', boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)' }}>
+                <Card key={story.publishedDateTime} 
+                      style={{ 
+                        marginTop: '10px',  
+                        borderRadius: '15px', 
+                        boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)',
+                        // Use a grayed-out color when story.exist is false
+                        backgroundColor: story.exist ? '#FFFFFF' : '#ECECEC',
+                        opacity: story.exist ? 1 : 0.5, // Adjust the opacity when story.exist is false
+                      }}>
                     <p style={{ marginBottom: '0px' }}>
                     Story Topic: <strong>{story.storyTitle}</strong>
                     </p>
@@ -121,6 +132,7 @@ const MyDashboard = ({signer, storyBet, topic, setTopic}) => {
                     <br/>
                     <Card style={{ marginTop: '10px',  borderRadius: '15px', boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)', backgroundColor: 'orange' }}>
                     <h2 style={{ marginTop: '20px' }}>Admin Area</h2>
+                    <h3>Current StoryBet Balance: <strong>{poolBalance / 10**17}</strong> coins = {poolBalance} wei</h3>
                     <Button onClick={handleClearStories}>
                         Clear All Stories
                     </Button>

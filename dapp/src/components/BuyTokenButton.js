@@ -47,9 +47,9 @@ function BuyTokenButton({storyBet}) {
 
   return (
     <>
-      <Button icon={<ShoppingCartOutlined />} onClick={handleBuyToken}>Buy Token</Button>
+      <Button icon={<ShoppingCartOutlined />} onClick={handleBuyToken}>Buy Coins</Button>
       <Modal
-        title="Buy Votes"
+        title="Buy Coins"
         open={modalVisible}
         onOk={handleOk}
         onCancel={handleCancel}

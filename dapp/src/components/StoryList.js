@@ -56,7 +56,7 @@
 
     return (
       <ul style={{ listStyleType: 'none', padding: 0, margin: '15px', flexDirection: 'column', alignItems: 'center' }}>
-        {stories.map((story, index) => (
+        {stories.filter(story => story.exist).map((story, index) => (
           <li key={parseInt(ethers.utils.formatUnits(story.publishedDateTime, 0))} style={{ marginBottom: '10px' }}>
             <Card style={{ 
                 borderRadius: '15px', 

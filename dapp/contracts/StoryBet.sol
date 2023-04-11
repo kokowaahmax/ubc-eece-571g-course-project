@@ -67,6 +67,7 @@ event StoryAdded2(
         Story memory newStory = Story(msg.sender, 0, _tags, _storyTitle,_publishedDateTime, _storyText, comments, true);
         userStory[msg.sender] = newStory;
         stories.push(newStory);
+        users.push(msg.sender);
 
         emit StoryAdded(msg.sender, 0, _tags, _storyTitle, _publishedDateTime, _storyText, comments, true);
     }
@@ -124,6 +125,33 @@ event StoryAdded2(
 
     function summaryVotes() public payable {
         require(msg.sender == owner, "only the admin can end vote");
+        uint allVotes = 0;
+
+        for (uint i = 0; i < stories.length; i++) {
+            if (stories[i].exist) {
+                allVotes += stories[i].numVote;
+            }
+        }
+
+        uint highestVote = 0;
+        address winner = address(0);
+
+        for (uint i = 0; i < users.length; i++) {
+            uint temp = 0;
+            for (uint j = 0; j < stories.length; j++) {
+                if (stories[j].exist && stories[j].ownerAddress == users[i]) {
+                    temp += stories[j].numVote;
+                }
+            }
+            if (temp > highestVote) {
+                highestVote = temp;
+                winner = users[i];
+            }
+        }
+
+        userVoteBalance[winner] += allVotes * votePrice;
+
+        clearBoard();
     }
 
     function rankStories() public returns (Story[] memory) {
@@ -166,13 +194,8 @@ event StoryAdded2(
     function clearBoard() public {
         require(msg.sender == owner, "Only the admin can end vote");
         uint len1 = stories.length;
-        uint len2 = users.length;
         for(uint i = 0; i < len1; i++){
             stories[i].exist = false;
-        }
-        
-        for(uint i = 0; i < len2; i++){
-            userStory[users[i]].exist = false;
         }
     }
 

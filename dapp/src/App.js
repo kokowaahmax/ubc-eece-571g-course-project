@@ -18,7 +18,7 @@ import BuyTokenButton from './components/BuyTokenButton';
 
 const { Header, Content, Footer } = Layout;
 // TODO: input your contract address
-const storyBetAddress = '0xE6E340D132b5f46d1e472DebcD681B2aBc16e57E';
+const storyBetAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
 function App() {
   const [storyBet, setStoryBet] = useState();
@@ -29,7 +29,7 @@ function App() {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [topic, setTopic] = useState('Welcome to StoryBet! Are you ready to put your creativity to the test? We challenge you to write a short story with at most 100 characters, starting with "I love to eat carbonara so much". The twist? The story should be unexpected and unique. The story with the most votes at the end of the competition will win all tokens in the pool. So what are you waiting for? Let us start writing!');
+  const [topic, setTopic] = useState('Welcome to StoryBet! Are you ready to put your creativity to the test? We challenge you to write a short story with at most 100 characters, starting with "I love to eat carbonara so much". The twist? The story should be unexpected and unique. The story with the most votes at the end of the competition will win all the coins in the pool. So what are you waiting for? Let us start writing!');
 
   useEffect(() => {
     async function init() {
@@ -59,8 +59,6 @@ function App() {
 
       if (_storyBet) {
         const _initStories = await _storyBet.getStories();
-        console.log("init line 62");
-        console.log(stories);
         setStories(_initStories);
       }
     }
@@ -70,7 +68,6 @@ function App() {
 
   useEffect(() => {
     if (storyBet) {
-      console.log("init line 73");
       const eventFilter = storyBet.filters.StoryAdded();
 
       const handleStoryAdded = async (
@@ -104,7 +101,6 @@ function App() {
 
   useEffect(() => {
     if (storyBet) {
-      console.log("init line 106");
       const eventFilter2 = storyBet.filters.StoryAdded2();
 
       const handleStoryAdded2 = async (
@@ -149,7 +145,7 @@ function App() {
     try {
       await storyBet.createStory([`${newStory.author}`], [`${topic}`], Date.now(), newStory.text);
     } catch (error) {
-      message.error("Can't submit a story. Do you have enough token?");
+      message.error("Can't submit a story. Do you have enough coins?");
     }
   }
 
